@@ -30,7 +30,7 @@
 // CẤU HÌNH
 // ============================================================
 const SHEET_NAME = 'Sheet1';
-const GEMINI_MODEL = 'gemini-2.5-flash';
+const GEMINI_MODEL = 'gemini-2.0-flash';
 
 // ============================================================
 // GET: Trả về từ vựng, hoặc ?action=listModels để xem models available
@@ -151,7 +151,7 @@ function handleAiRequest(body) {
 
   const apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/' + GEMINI_MODEL + ':generateContent?key=' + key;
 
-  const response = UrlFetchApp.fetch(apiUrl, {
+  const requestOptions = {
     method: 'post',
     contentType: 'application/json',
     payload: JSON.stringify({
@@ -159,14 +159,23 @@ function handleAiRequest(body) {
       generationConfig: { temperature: 0.7 },
     }),
     muteHttpExceptions: true,
-  });
+  };
 
-  const code = response.getResponseCode();
-  const data = JSON.parse(response.getContentText());
+  let response, code, data;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    response = UrlFetchApp.fetch(apiUrl, requestOptions);
+    code = response.getResponseCode();
+    data = JSON.parse(response.getContentText());
+    if (code === 200) break;
+    const isRetryable = code === 429 || code === 503 ||
+      (data?.error?.message || '').toLowerCase().includes('high demand');
+    if (!isRetryable || attempt === 3) break;
+    Utilities.sleep(attempt * 2000);
+  }
 
   if (code !== 200) {
     const msg = data?.error?.message || ('Gemini HTTP ' + code);
-    return jsonResponse({ error: msg }, code);
+    return jsonResponse({ error: msg });
   }
 
   const text = (data.candidates || [])[0]?.content?.parts?.[0]?.text || '';
