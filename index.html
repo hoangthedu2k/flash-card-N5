@@ -813,45 +813,27 @@
         lsClear();
       };
 
-      // ----- AI (Gemini) -----
+      // ----- AI (Gemini qua Apps Script proxy) -----
       const fetchAiHelp = async (word) => {
-        const geminiKey = getGeminiKey();
-        if (!geminiKey) { setAiError("Chưa có Gemini API key. Nhấn ⚙ để cài đặt."); return; }
+        if (!CONFIG.APPS_SCRIPT_URL) {
+          setAiError("Chưa cấu hình APPS_SCRIPT_URL. Tính năng AI cần Apps Script.");
+          return;
+        }
         setAiLoading(true); setAiError(''); setAiData(null);
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${geminiKey}`;
-        const prompt = `Bạn là giáo viên tiếng Nhật N5. Từ vựng: "${word.kanji}" (${word.kana}) - nghĩa tiếng Việt: "${word.meaning}".
-
-Trả lời ĐÚNG định dạng JSON sau, không thêm gì khác:
-{"examples":[{"japanese":"...","romaji":"...","vietnamese":"..."},{"japanese":"...","romaji":"...","vietnamese":"..."}],"tip":"..."}
-
-Yêu cầu:
-- examples: 2 câu ví dụ tiếng Nhật N5 đơn giản, có romaji và dịch tiếng Việt
-- tip: 1 mẹo nhớ từ bằng tiếng Việt`;
-        const payload = {
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.7 }
-        };
         const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), 15000);
+        const timer = setTimeout(() => controller.abort(), 20000);
         try {
-          const res = await fetch(apiUrl, {
+          const res = await fetch(CONFIG.APPS_SCRIPT_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify({ action: 'ai', kanji: word.kanji, kana: word.kana, meaning: word.meaning }),
             signal: controller.signal,
           });
           const data = await res.json();
-          if (!res.ok) {
-            const msg = data?.error?.message || data?.error?.status || ('HTTP ' + res.status);
-            throw new Error(res.status + ': ' + msg);
-          }
-          const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (!text) throw new Error('Empty response');
-          const jsonMatch = text.match(/\{[\s\S]*\}/);
-          if (!jsonMatch) throw new Error('No JSON in response');
-          setAiData(JSON.parse(jsonMatch[0]));
+          if (!res.ok || data.error) throw new Error(data.error || ('HTTP ' + res.status));
+          setAiData(data);
         } catch (err) {
-          setAiError(err.name === 'AbortError' ? 'Timeout: AI không phản hồi sau 15s. Thử lại.' : 'Lỗi: ' + err.message);
+          setAiError(err.name === 'AbortError' ? 'Timeout: AI không phản hồi sau 20s. Thử lại.' : 'Lỗi: ' + err.message);
         } finally {
           clearTimeout(timer);
           setAiLoading(false);
@@ -871,41 +853,30 @@ Yêu cầu:
           onClick={() => setShowSettings(false)}>
           <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 animate-fade-in"
             onClick={e => e.stopPropagation()}>
-            <h2 className="text-lg font-bold text-gray-800 mb-1">Cài đặt</h2>
-            <p className="text-xs text-gray-500 mb-4">API key được lưu trong localStorage của trình duyệt, không nằm trong mã nguồn.</p>
+            <h2 className="text-lg font-bold text-gray-800 mb-4">Cài đặt</h2>
 
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Gemini API Key</label>
-            <div className="relative mb-1">
-              <input
-                type={showKeyText ? 'text' : 'password'}
-                className="w-full border border-gray-300 rounded-lg pl-3 pr-10 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
-                placeholder="AIza..."
-                value={geminiKeyInput}
-                onChange={e => setGeminiKeyInput(e.target.value)}
-              />
-              <button type="button" onClick={() => setShowKeyText(p => !p)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                {showKeyText ? <EyeOffIcon size={16} /> : <EyeIcon size={16} />}
-              </button>
+            <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4 mb-4">
+              <p className="text-sm font-semibold text-indigo-700 mb-1">✨ Tính năng AI</p>
+              <p className="text-xs text-gray-600 leading-relaxed">
+                AI chạy qua <strong>Google Apps Script</strong> — Gemini API key được lưu an toàn trong Script Properties, không xuất hiện trong trình duyệt.
+              </p>
             </div>
+
+            <p className="text-xs font-semibold text-gray-700 mb-2">Cách cài Gemini API key:</p>
+            <ol className="text-xs text-gray-600 space-y-1 mb-4 list-decimal list-inside leading-relaxed">
+              <li>Mở Google Apps Script editor của bạn</li>
+              <li>Vào <strong>Project Settings ⚙️ → Script properties</strong></li>
+              <li>Add property: <code className="bg-gray-100 px-1 rounded">GEMINI_API_KEY</code> = key của bạn</li>
+              <li>Save → <strong>Deploy → Manage deployments → New version</strong></li>
+            </ol>
             <p className="text-xs text-gray-400 mb-4">
               Lấy key miễn phí tại <span className="text-blue-500">aistudio.google.com/app/apikey</span>
             </p>
 
-            <div className="flex gap-2">
-              <button onClick={() => { lsSet('n5_gemini_key', geminiKeyInput.trim()); setShowSettings(false); }}
-                className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-bold text-sm hover:bg-blue-700 transition-colors">
-                Lưu
-              </button>
-              <button onClick={() => { setGeminiKeyInput(''); lsSet('n5_gemini_key', ''); }}
-                className="px-4 py-2 text-red-500 text-sm font-medium hover:bg-red-50 rounded-lg transition-colors">
-                Xóa key
-              </button>
-              <button onClick={() => setShowSettings(false)}
-                className="px-4 py-2 text-gray-500 text-sm font-medium hover:bg-gray-100 rounded-lg transition-colors">
-                Đóng
-              </button>
-            </div>
+            <button onClick={() => setShowSettings(false)}
+              className="w-full bg-gray-800 text-white py-2 rounded-lg font-bold text-sm hover:bg-gray-900 transition-colors">
+              Đóng
+            </button>
           </div>
         </div>
       );

@@ -6,27 +6,31 @@
  * 2. Menu: Extensions > Apps Script
  * 3. Xóa code cũ, dán toàn bộ file này vào
  * 4. Sửa SHEET_NAME nếu sheet của bạn không phải "Sheet1"
- * 5. Menu: Deploy > New deployment
+ * 5. (Tùy chọn) Cài Gemini API key cho tính năng AI — xem hướng dẫn bên dưới
+ * 6. Menu: Deploy > New deployment
  *    - Type: Web app
  *    - Execute as: Me
  *    - Who has access: Anyone
- * 6. Copy URL deployment dán vào CONFIG.APPS_SCRIPT_URL trong index.html
+ * 7. Copy URL deployment dán vào CONFIG.APPS_SCRIPT_URL trong index.html
+ *
+ * CÀI ĐẶT GEMINI API KEY (để dùng tính năng AI):
+ * 1. Trong Apps Script editor: menu Project Settings (biểu tượng ⚙️)
+ * 2. Chọn tab "Script properties"
+ * 3. Add property: Name = GEMINI_API_KEY, Value = <key của bạn>
+ * 4. Save → Redeploy (Deploy > Manage deployments > chọn New version)
  *
  * ĐỊNH DẠNG GOOGLE SHEET (bắt buộc):
  * | A (kanji) | B (kana)   | C (meaning) | D (status)  |
  * |-----------|------------|-------------|-------------|
  * | 日本       | にほん      | Nhật Bản    | new         |
  * | 学校       | がっこう    | Trường học  | learned     |
- *
- * Dòng đầu tiên là HEADER (tiêu đề), dữ liệu bắt đầu từ dòng 2.
- * Cột D (status) có thể để trống — mặc định là "new".
- * Các giá trị status hợp lệ: new | learned | review | mastered
  */
 
 // ============================================================
 // CẤU HÌNH
 // ============================================================
-const SHEET_NAME = 'Sheet1'; // Tên sheet (tab) chứa từ vựng
+const SHEET_NAME = 'Sheet1';
+const GEMINI_MODEL = 'gemini-2.0-flash';
 
 // ============================================================
 // GET: Trả về toàn bộ từ vựng kèm trạng thái (dạng JSON)
@@ -40,7 +44,7 @@ function doGet(e) {
       return jsonResponse([]);
     }
 
-    const words = data.slice(1) // bỏ dòng header
+    const words = data.slice(1)
       .map(row => ({
         kanji:   String(row[0] || '').trim(),
         kana:    String(row[1] || '').trim(),
@@ -56,12 +60,18 @@ function doGet(e) {
 }
 
 // ============================================================
-// POST: Cập nhật trạng thái của một từ
-// Body: { "kanji": "日本", "status": "learned" }
+// POST: Cập nhật trạng thái HOẶC gọi AI
+// Body cập nhật status: { "kanji": "日本", "status": "learned" }
+// Body gọi AI:          { "action": "ai", "kanji": "日本", "kana": "にほん", "meaning": "Nhật Bản" }
 // ============================================================
 function doPost(e) {
   try {
-    const body   = JSON.parse(e.postData.contents);
+    const body = JSON.parse(e.postData.contents);
+
+    if (body.action === 'ai') {
+      return handleAiRequest(body);
+    }
+
     const kanji  = String(body.kanji  || '').trim();
     const status = String(body.status || '').trim();
 
@@ -97,6 +107,62 @@ function doPost(e) {
 }
 
 // ============================================================
+// AI: Gọi Gemini server-side, key lưu trong Script Properties
+// ============================================================
+function handleAiRequest(body) {
+  const key = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
+  if (!key) {
+    return jsonResponse({ error: 'GEMINI_API_KEY chưa được cài trong Script Properties. Xem hướng dẫn trong apps-script.js.' }, 500);
+  }
+
+  const kanji   = String(body.kanji   || '').trim();
+  const kana    = String(body.kana    || '').trim();
+  const meaning = String(body.meaning || '').trim();
+
+  if (!kanji || !kana || !meaning) {
+    return jsonResponse({ error: 'Missing kanji, kana or meaning' }, 400);
+  }
+
+  const prompt =
+    'Bạn là giáo viên tiếng Nhật N5. Từ vựng: "' + kanji + '" (' + kana + ') - nghĩa tiếng Việt: "' + meaning + '".\n\n' +
+    'Trả lời ĐÚNG định dạng JSON sau, không thêm gì khác:\n' +
+    '{"examples":[{"japanese":"...","romaji":"...","vietnamese":"..."},{"japanese":"...","romaji":"...","vietnamese":"..."}],"tip":"..."}\n\n' +
+    'Yêu cầu:\n' +
+    '- examples: 2 câu ví dụ tiếng Nhật N5 đơn giản, có romaji và dịch tiếng Việt\n' +
+    '- tip: 1 mẹo nhớ từ bằng tiếng Việt';
+
+  const apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/' + GEMINI_MODEL + ':generateContent?key=' + key;
+
+  const response = UrlFetchApp.fetch(apiUrl, {
+    method: 'post',
+    contentType: 'application/json',
+    payload: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.7 },
+    }),
+    muteHttpExceptions: true,
+  });
+
+  const code = response.getResponseCode();
+  const data = JSON.parse(response.getContentText());
+
+  if (code !== 200) {
+    const msg = data?.error?.message || ('Gemini HTTP ' + code);
+    return jsonResponse({ error: msg }, code);
+  }
+
+  const text = (data.candidates || [])[0]?.content?.parts?.[0]?.text || '';
+  const match = text.match(/\{[\s\S]*\}/);
+  if (!match) return jsonResponse({ error: 'Gemini trả về không đúng định dạng JSON' }, 500);
+
+  try {
+    return jsonResponse(JSON.parse(match[0]));
+  } catch (err) {
+    return jsonResponse({ error: 'JSON parse error: ' + err.message }, 500);
+  }
+}
+
+// ============================================================
 // HELPERS
 // ============================================================
 function getSheet() {
@@ -106,9 +172,8 @@ function getSheet() {
   return sheet;
 }
 
-function jsonResponse(data, statusCode) {
-  const output = ContentService
+function jsonResponse(data) {
+  return ContentService
     .createTextOutput(JSON.stringify(data))
     .setMimeType(ContentService.MimeType.JSON);
-  return output;
 }
