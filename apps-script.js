@@ -30,7 +30,7 @@
 // CẤU HÌNH
 // ============================================================
 const SHEET_NAME = 'Sheet1';
-const GEMINI_MODEL = 'gemini-2.0-flash';
+const GEMINI_MODEL = 'gemini-1.5-flash';
 
 // ============================================================
 // GET: Trả về toàn bộ từ vựng kèm trạng thái (dạng JSON)
