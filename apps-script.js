@@ -33,10 +33,14 @@ const SHEET_NAME = 'Sheet1';
 const GEMINI_MODEL = 'gemini-1.5-flash';
 
 // ============================================================
-// GET: Trả về toàn bộ từ vựng kèm trạng thái (dạng JSON)
+// GET: Trả về từ vựng, hoặc ?action=listModels để xem models available
 // ============================================================
 function doGet(e) {
   try {
+    if (e && e.parameter && e.parameter.action === 'listModels') {
+      return listAvailableModels();
+    }
+
     const sheet = getSheet();
     const data  = sheet.getDataRange().getValues();
 
@@ -57,6 +61,20 @@ function doGet(e) {
   } catch (err) {
     return jsonResponse({ error: err.message }, 500);
   }
+}
+
+function listAvailableModels() {
+  const key = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
+  if (!key) return jsonResponse({ error: 'GEMINI_API_KEY chưa được cài' }, 500);
+  const res = UrlFetchApp.fetch(
+    'https://generativelanguage.googleapis.com/v1beta/models?key=' + key,
+    { muteHttpExceptions: true }
+  );
+  const data = JSON.parse(res.getContentText());
+  const names = (data.models || [])
+    .filter(m => (m.supportedGenerationMethods || []).includes('generateContent'))
+    .map(m => m.name);
+  return jsonResponse({ models: names });
 }
 
 // ============================================================
