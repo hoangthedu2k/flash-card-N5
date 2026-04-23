@@ -849,31 +849,17 @@ YÊU CẦU:
             }
           }
         };
-        const callApi = async (attempt) => {
-          const res = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-          if (res.status === 429) {
-            if (attempt < 3) {
-              const wait = attempt * 3000;
-              setAiError(`Đang chờ ${wait / 1000}s do giới hạn API...`);
-              await new Promise(r => setTimeout(r, wait));
-              setAiError('');
-              return callApi(attempt + 1);
-            }
-            throw new Error('rate_limit');
-          }
-          if (!res.ok) throw new Error('HTTP ' + res.status);
-          return res.json();
-        };
         try {
-          const data = await callApi(1);
+          const res = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+          const data = await res.json();
+          if (!res.ok) {
+            const msg = data?.error?.message || data?.error?.status || ('HTTP ' + res.status);
+            throw new Error(res.status + ': ' + msg);
+          }
           const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
           if (text) setAiData(JSON.parse(text)); else throw new Error('Empty response');
         } catch (err) {
-          if (err.message === 'rate_limit') {
-            setAiError('Vượt giới hạn API (15 req/phút). Vui lòng đợi 1 phút rồi thử lại.');
-          } else {
-            setAiError('Lỗi gọi AI. Kiểm tra API key hoặc thử lại sau.');
-          }
+          setAiError('Lỗi: ' + err.message);
         } finally {
           setAiLoading(false);
         }
