@@ -132,9 +132,6 @@
       // URL của Google Apps Script Web App (deploy as: Execute as Me, Anyone)
       // Để trống ("") để dùng từ vựng built-in không cần Google Sheets
       APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbzHGmlVBn8cza5GTOkpAtmibPyttf74gH9WOAMeqkcSo3Ho110tXM0Egi0KVitZ3T2NPQ/exec",
-
-      // Gemini API key (để trống nếu không dùng tính năng AI)
-      GEMINI_API_KEY: "AIzaSyCaMErwRhrJquPm3p5QHgORJOXkAaYDfjM",
     };
 
     // =============================================================
@@ -158,6 +155,9 @@
       try {
         ['n5_statuses', 'n5_last_batch', 'n5_words_cache'].forEach(k => localStorage.removeItem(k));
       } catch { }
+    }
+    function getGeminiKey() {
+      return lsGet('n5_gemini_key', '') || '';
     }
 
     // =============================================================
@@ -579,6 +579,9 @@
     const CheckCircleIcon = ({ size, className }) => <Svg size={size} className={className}><circle cx="12" cy="12" r="10" /><path d="m9 12 2 2 4-4" /></Svg>;
     const XCircleIcon = ({ size, className }) => <Svg size={size} className={className}><circle cx="12" cy="12" r="10" /><path d="m15 9-6 6" /><path d="m9 9 6 6" /></Svg>;
     const RotateCcwIcon = ({ size, className }) => <Svg size={size} className={className}><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></Svg>;
+    const SettingsIcon = ({ size, className }) => <Svg size={size} className={className}><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" /><circle cx="12" cy="12" r="3" /></Svg>;
+    const EyeOffIcon = ({ size, className }) => <Svg size={size} className={className}><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" /><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" /><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" /><line x1="2" x2="22" y1="2" y2="22" /></Svg>;
+    const EyeIcon = ({ size, className }) => <Svg size={size} className={className}><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></Svg>;
 
     // =============================================================
     // APP COMPONENT
@@ -608,6 +611,9 @@
 
       // UI state
       const [showResetConfirm, setShowResetConfirm] = useState(false);
+      const [showSettings, setShowSettings] = useState(false);
+      const [geminiKeyInput, setGeminiKeyInput] = useState(() => getGeminiKey());
+      const [showKeyText, setShowKeyText] = useState(false);
 
       // AI state
       const [aiLoading, setAiLoading] = useState(false);
@@ -809,9 +815,10 @@
 
       // ----- AI (Gemini) -----
       const fetchAiHelp = async (word) => {
-        if (!CONFIG.GEMINI_API_KEY) { setAiError("Chưa cấu hình Gemini API key trong CONFIG."); return; }
+        const geminiKey = getGeminiKey();
+        if (!geminiKey) { setAiError("Chưa có Gemini API key. Nhấn ⚙ để cài đặt."); return; }
         setAiLoading(true); setAiError(''); setAiData(null);
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${CONFIG.GEMINI_API_KEY}`;
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`;
         const prompt = `Bạn là giáo viên tiếng Nhật N5. Từ vựng: "${word.kanji}" (${word.kana}) - nghĩa tiếng Việt: "${word.meaning}".
 
 YÊU CẦU:
@@ -849,10 +856,62 @@ YÊU CẦU:
       if (appLoading) return null;
 
       // =============================================================
+      // RENDER: Settings modal
+      // =============================================================
+      const renderSettings = () => (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowSettings(false)}>
+          <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 animate-fade-in"
+            onClick={e => e.stopPropagation()}>
+            <h2 className="text-lg font-bold text-gray-800 mb-1">Cài đặt</h2>
+            <p className="text-xs text-gray-500 mb-4">API key được lưu trong localStorage của trình duyệt, không nằm trong mã nguồn.</p>
+
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Gemini API Key</label>
+            <div className="relative mb-1">
+              <input
+                type={showKeyText ? 'text' : 'password'}
+                className="w-full border border-gray-300 rounded-lg pl-3 pr-10 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+                placeholder="AIza..."
+                value={geminiKeyInput}
+                onChange={e => setGeminiKeyInput(e.target.value)}
+              />
+              <button type="button" onClick={() => setShowKeyText(p => !p)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                {showKeyText ? <EyeOffIcon size={16} /> : <EyeIcon size={16} />}
+              </button>
+            </div>
+            <p className="text-xs text-gray-400 mb-4">
+              Lấy key miễn phí tại <span className="text-blue-500">aistudio.google.com/app/apikey</span>
+            </p>
+
+            <div className="flex gap-2">
+              <button onClick={() => { lsSet('n5_gemini_key', geminiKeyInput.trim()); setShowSettings(false); }}
+                className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-bold text-sm hover:bg-blue-700 transition-colors">
+                Lưu
+              </button>
+              <button onClick={() => { setGeminiKeyInput(''); lsSet('n5_gemini_key', ''); }}
+                className="px-4 py-2 text-red-500 text-sm font-medium hover:bg-red-50 rounded-lg transition-colors">
+                Xóa key
+              </button>
+              <button onClick={() => setShowSettings(false)}
+                className="px-4 py-2 text-gray-500 text-sm font-medium hover:bg-gray-100 rounded-lg transition-colors">
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+
+      // =============================================================
       // RENDER: Menu
       // =============================================================
       const renderMenu = () => (
-        <div className="flex flex-col items-center justify-center p-8 bg-white rounded-2xl shadow-xl max-w-md w-full">
+        <div className="flex flex-col items-center justify-center p-8 bg-white rounded-2xl shadow-xl max-w-md w-full relative">
+          <button onClick={() => setShowSettings(true)}
+            title="Cài đặt"
+            className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 hover:bg-gray-100 p-2 rounded-full transition-colors">
+            <SettingsIcon size={18} />
+          </button>
           <div className="w-20 h-20 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-6">
             <GradCapIcon size={40} />
           </div>
@@ -1140,6 +1199,7 @@ YÊU CẦU:
           {currentMode === 'learning' && renderLearning()}
           {currentMode === 'quiz' && renderQuiz()}
           {currentMode === 'result' && renderResult()}
+          {showSettings && renderSettings()}
         </div>
       );
     }
