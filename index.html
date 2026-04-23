@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,1073 +8,1133 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     /* 3D Flip */
-    .perspective-1000 { perspective: 1000px; }
-    .transform-style-3d { transform-style: preserve-3d; }
-    .backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
-    .rotate-y-180 { transform: rotateY(180deg); }
+    .perspective-1000 {
+      perspective: 1000px;
+    }
+
+    .transform-style-3d {
+      transform-style: preserve-3d;
+    }
+
+    .backface-hidden {
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+
+    .rotate-y-180 {
+      transform: rotateY(180deg);
+    }
 
     /* Animations */
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-    .animate-fade-in { animation: fadeIn 0.3s ease forwards; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .animate-spin { animation: spin 0.8s linear infinite; }
-    @keyframes pulse { 0%,100%{ opacity:1 } 50%{ opacity:.4 } }
-    .animate-pulse { animation: pulse 1.5s ease-in-out infinite; }
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-fade-in {
+      animation: fadeIn 0.3s ease forwards;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .animate-spin {
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: .4
+      }
+    }
+
+    .animate-pulse {
+      animation: pulse 1.5s ease-in-out infinite;
+    }
 
     /* Pre-React loading screen */
     #splash {
-      position: fixed; inset: 0;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      background: #f9fafb; z-index: 9999;
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #f9fafb;
+      z-index: 9999;
       transition: opacity 0.4s;
     }
-    #splash.hidden { opacity: 0; pointer-events: none; }
+
+    #splash.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
     .splash-spinner {
-      width: 40px; height: 40px;
-      border: 4px solid #e5e7eb; border-top-color: #3b82f6;
-      border-radius: 50%; animation: spin 0.8s linear infinite;
+      width: 40px;
+      height: 40px;
+      border: 4px solid #e5e7eb;
+      border-top-color: #3b82f6;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
     }
   </style>
 </head>
+
 <body class="bg-gray-50 font-sans">
 
-<!-- Loading splash (visible before React mounts) -->
-<div id="splash">
-  <div class="splash-spinner"></div>
-  <p style="margin-top:16px;color:#6b7280;font-size:14px;">Đang khởi động...</p>
-</div>
+  <!-- Loading splash (visible before React mounts) -->
+  <div id="splash">
+    <div class="splash-spinner"></div>
+    <p style="margin-top:16px;color:#6b7280;font-size:14px;">Đang khởi động...</p>
+  </div>
 
-<div id="root"></div>
+  <div id="root"></div>
 
-<!-- React 18 UMD -->
-<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<!-- Babel Standalone (JSX transform) -->
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- React 18 UMD -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <!-- Babel Standalone (JSX transform) -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-<script type="text/babel">
-// =============================================================
-// CONFIG — Điền thông tin của bạn vào đây
-// =============================================================
-const CONFIG = {
-  // URL của Google Apps Script Web App (deploy as: Execute as Me, Anyone)
-  // Để trống ("") để dùng từ vựng built-in không cần Google Sheets
-  APPS_SCRIPT_URL: "",
+  <script type="text/babel">
+    // =============================================================
+    // CONFIG — Điền thông tin của bạn vào đây
+    // =============================================================
+    const CONFIG = {
+      // URL của Google Apps Script Web App (deploy as: Execute as Me, Anyone)
+      // Để trống ("") để dùng từ vựng built-in không cần Google Sheets
+      APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbz-k5dyvGMK4fjxoZs7GNjoeeBcrqvH_zypye694Dg26oaMlfqHreMgprQBjoYYoXhDiQ/exec",
 
-  // Gemini API key (để trống nếu không dùng tính năng AI)
-  GEMINI_API_KEY: "",
-};
+      // Gemini API key (để trống nếu không dùng tính năng AI)
+      GEMINI_API_KEY: "AIzaSyCaMErwRhrJquPm3p5QHgORJOXkAaYDfjM",
+    };
 
-// =============================================================
-// REACT HOOKS
-// =============================================================
-const { useState, useEffect, useCallback } = React;
+    // =============================================================
+    // REACT HOOKS
+    // =============================================================
+    const { useState, useEffect, useCallback } = React;
 
-// =============================================================
-// LOCALSTORAGE HELPERS (safe — handles private/incognito mode)
-// =============================================================
-function lsGet(key, def) {
-  try {
-    const v = localStorage.getItem(key);
-    return v !== null ? JSON.parse(v) : def;
-  } catch { return def; }
-}
-function lsSet(key, val) {
-  try { localStorage.setItem(key, JSON.stringify(val)); } catch {}
-}
-function lsClear() {
-  try {
-    ['n5_statuses', 'n5_last_batch', 'n5_words_cache'].forEach(k => localStorage.removeItem(k));
-  } catch {}
-}
-
-// =============================================================
-// API — Google Apps Script
-// =============================================================
-async function fetchVocabulary() {
-  if (!CONFIG.APPS_SCRIPT_URL) return null;
-  try {
-    const res = await fetch(CONFIG.APPS_SCRIPT_URL + (CONFIG.APPS_SCRIPT_URL.includes('?') ? '&' : '?') + '_t=' + Date.now());
-    if (!res.ok) return null;
-    const data = await res.json();
-    if (!Array.isArray(data) || data.length === 0) return null;
-    return data;
-  } catch { return null; }
-}
-
-// Fire-and-forget: ghi trạng thái về sheet (no-cors tránh CORS preflight)
-function pushStatus(kanji, status) {
-  if (!CONFIG.APPS_SCRIPT_URL) return;
-  fetch(CONFIG.APPS_SCRIPT_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    body: JSON.stringify({ kanji, status }),
-  }).catch(() => {});
-}
-
-// =============================================================
-// VOCABULARY FALLBACK (từ react.md — dùng khi không có Google Sheets)
-// =============================================================
-const N5_WORDS_FALLBACK = [
-  // --- QUỐC GIA & NGÔN NGỮ ---
-  { kanji: "ベトナム", kana: "ベトナム", meaning: "Việt Nam" },
-  { kanji: "日本", kana: "にほん", meaning: "Nhật Bản" },
-  { kanji: "中国", kana: "ちゅうごく", meaning: "Trung Quốc" },
-  { kanji: "韓国", kana: "かんこく", meaning: "Hàn Quốc" },
-  { kanji: "タイ", kana: "タイ", meaning: "Thái Lan" },
-  { kanji: "フランス", kana: "フランス", meaning: "Nước Pháp" },
-  { kanji: "日本語", kana: "にほんご", meaning: "Tiếng Nhật" },
-  { kanji: "英語", kana: "えいご", meaning: "Tiếng Anh" },
-  // --- ĐẠI TỪ & NGƯỜI ---
-  { kanji: "私", kana: "わたし", meaning: "Tôi" },
-  { kanji: "あなた", kana: "あなた", meaning: "Bạn" },
-  { kanji: "あの人", kana: "あのひと", meaning: "Người kia" },
-  { kanji: "あの方", kana: "あのかた", meaning: "Vị kia (lịch sự)" },
-  { kanji: "皆さん", kana: "みなさん", meaning: "Mọi người" },
-  { kanji: "男の人", kana: "おとこのひと", meaning: "Người đàn ông" },
-  { kanji: "女の人", kana: "おんなのひと", meaning: "Người phụ nữ" },
-  { kanji: "男の子", kana: "おとこのこ", meaning: "Cậu bé" },
-  { kanji: "女の子", kana: "おんなのこ", meaning: "Cô bé" },
-  { kanji: "子ども", kana: "こども", meaning: "Trẻ em, con cái" },
-  { kanji: "友達", kana: "ともだち", meaning: "Bạn bè" },
-  { kanji: "恋人", kana: "こいびと", meaning: "Người yêu" },
-  { kanji: "大人", kana: "おとな", meaning: "Người lớn" },
-  { kanji: "誰", kana: "だれ", meaning: "Ai" },
-  { kanji: "どなた", kana: "どなた", meaning: "Ai (lịch sự)" },
-  // --- GIA ĐÌNH ---
-  { kanji: "家族", kana: "かぞく", meaning: "Gia đình" },
-  { kanji: "父", kana: "ちち", meaning: "Bố (của mình)" },
-  { kanji: "母", kana: "はは", meaning: "Mẹ (của mình)" },
-  { kanji: "兄", kana: "あに", meaning: "Anh trai (của mình)" },
-  { kanji: "姉", kana: "あね", meaning: "Chị gái (của mình)" },
-  { kanji: "弟", kana: "おとうと", meaning: "Em trai (của mình)" },
-  { kanji: "妹", kana: "いもうと", meaning: "Em gái (của mình)" },
-  { kanji: "お父さん", kana: "おとうさん", meaning: "Bố (của người khác)" },
-  { kanji: "お母さん", kana: "おかあさん", meaning: "Mẹ (của người khác)" },
-  { kanji: "お兄さん", kana: "おにいさん", meaning: "Anh trai (của người khác)" },
-  { kanji: "お姉さん", kana: "おねえさん", meaning: "Chị gái (của người khác)" },
-  { kanji: "祖父", kana: "そふ", meaning: "Ông (của mình)" },
-  { kanji: "祖母", kana: "そぼ", meaning: "Bà (của mình)" },
-  { kanji: "両親", kana: "りょうしん", meaning: "Bố mẹ" },
-  { kanji: "兄弟", kana: "きょうだい", meaning: "Anh em" },
-  // --- NGHỀ NGHIỆP ---
-  { kanji: "先生", kana: "せんせい", meaning: "Giáo viên" },
-  { kanji: "教師", kana: "きょうし", meaning: "Giáo viên (nghề nghiệp)" },
-  { kanji: "学生", kana: "がくせい", meaning: "Học sinh, sinh viên" },
-  { kanji: "会社員", kana: "かいしゃいん", meaning: "Nhân viên công ty" },
-  { kanji: "銀行員", kana: "ぎんこういん", meaning: "Nhân viên ngân hàng" },
-  { kanji: "医者", kana: "いしゃ", meaning: "Bác sĩ" },
-  { kanji: "職員", kana: "しょくいん", meaning: "Nhân viên, công chức" },
-  { kanji: "作家", kana: "さっか", meaning: "Nhà văn, tác giả" },
-  { kanji: "運転手", kana: "うんてんしゅ", meaning: "Tài xế" },
-  { kanji: "エンジニア", kana: "エンジニア", meaning: "Kỹ sư" },
-  { kanji: "店員", kana: "てんいん", meaning: "Nhân viên cửa hàng" },
-  { kanji: "歌手", kana: "かしゅ", meaning: "Ca sĩ" },
-  { kanji: "社長", kana: "しゃちょう", meaning: "Giám đốc" },
-  { kanji: "部長", kana: "ぶちょう", meaning: "Trưởng phòng" },
-  // --- THỜI GIAN ---
-  { kanji: "今", kana: "いま", meaning: "Bây giờ" },
-  { kanji: "朝", kana: "あさ", meaning: "Buổi sáng" },
-  { kanji: "昼", kana: "ひる", meaning: "Buổi trưa" },
-  { kanji: "夜", kana: "よる", meaning: "Buổi tối" },
-  { kanji: "午前", kana: "ごぜん", meaning: "Sáng (A.M)" },
-  { kanji: "午後", kana: "ごご", meaning: "Chiều (P.M)" },
-  { kanji: "今日", kana: "きょう", meaning: "Hôm nay" },
-  { kanji: "明日", kana: "あした", meaning: "Ngày mai" },
-  { kanji: "明後日", kana: "あさって", meaning: "Ngày kia" },
-  { kanji: "昨日", kana: "きのう", meaning: "Hôm qua" },
-  { kanji: "一昨日", kana: "おととい", meaning: "Hôm kia" },
-  { kanji: "今朝", kana: "けさ", meaning: "Sáng nay" },
-  { kanji: "今晩", kana: "こんばん", meaning: "Tối nay" },
-  { kanji: "毎日", kana: "まいにち", meaning: "Mỗi ngày" },
-  { kanji: "毎朝", kana: "まいあさ", meaning: "Mỗi sáng" },
-  { kanji: "毎晩", kana: "まいばん", meaning: "Mỗi tối" },
-  { kanji: "先週", kana: "せんしゅう", meaning: "Tuần trước" },
-  { kanji: "今週", kana: "こんしゅう", meaning: "Tuần này" },
-  { kanji: "来週", kana: "らいしゅう", meaning: "Tuần sau" },
-  { kanji: "先月", kana: "せんげつ", meaning: "Tháng trước" },
-  { kanji: "今月", kana: "こんげつ", meaning: "Tháng này" },
-  { kanji: "来月", kana: "らいげつ", meaning: "Tháng sau" },
-  { kanji: "去年", kana: "きょねん", meaning: "Năm ngoái" },
-  { kanji: "今年", kana: "ことし", meaning: "Năm nay" },
-  { kanji: "来年", kana: "らいねん", meaning: "Năm sau" },
-  { kanji: "時間", kana: "じかん", meaning: "Thời gian" },
-  // --- ĐỊA ĐIỂM & ĐI LẠI ---
-  { kanji: "学校", kana: "がっこう", meaning: "Trường học" },
-  { kanji: "大学", kana: "だいがく", meaning: "Đại học" },
-  { kanji: "図書館", kana: "としょかん", meaning: "Thư viện" },
-  { kanji: "郵便局", kana: "ゆうびんきょく", meaning: "Bưu điện" },
-  { kanji: "病院", kana: "びょういん", meaning: "Bệnh viện" },
-  { kanji: "銀行", kana: "ぎんこう", meaning: "Ngân hàng" },
-  { kanji: "駅", kana: "えき", meaning: "Ga tàu" },
-  { kanji: "空港", kana: "くうこう", meaning: "Sân bay" },
-  { kanji: "ホテル", kana: "ホテル", meaning: "Khách sạn" },
-  { kanji: "店", kana: "みせ", meaning: "Cửa hàng" },
-  { kanji: "スーパー", kana: "スーパー", meaning: "Siêu thị" },
-  { kanji: "デパート", kana: "デパート", meaning: "Trung tâm thương mại" },
-  { kanji: "レストラン", kana: "レストラン", meaning: "Nhà hàng" },
-  { kanji: "公園", kana: "こうえん", meaning: "Công viên" },
-  { kanji: "海", kana: "うみ", meaning: "Biển" },
-  { kanji: "山", kana: "やま", meaning: "Núi" },
-  { kanji: "川", kana: "かわ", meaning: "Sông" },
-  { kanji: "橋", kana: "はし", meaning: "Cây cầu" },
-  { kanji: "道", kana: "みち", meaning: "Con đường" },
-  // --- ĐỒ VẬT & ĐỒ ĂN ---
-  { kanji: "車", kana: "くるま", meaning: "Xe ô tô" },
-  { kanji: "自転車", kana: "じてんしゃ", meaning: "Xe đạp" },
-  { kanji: "電車", kana: "でんしゃ", meaning: "Tàu điện" },
-  { kanji: "飛行機", kana: "ひこうき", meaning: "Máy bay" },
-  { kanji: "バス", kana: "バス", meaning: "Xe buýt" },
-  { kanji: "タクシー", kana: "タクシー", meaning: "Taxi" },
-  { kanji: "本", kana: "ほん", meaning: "Sách" },
-  { kanji: "雑誌", kana: "ざっし", meaning: "Tạp chí" },
-  { kanji: "新聞", kana: "しんぶん", meaning: "Báo" },
-  { kanji: "手紙", kana: "てがみ", meaning: "Thư" },
-  { kanji: "電話", kana: "でんわ", meaning: "Điện thoại" },
-  { kanji: "テレビ", kana: "テレビ", meaning: "Ti vi" },
-  { kanji: "ラジオ", kana: "ラジオ", meaning: "Đài radio" },
-  { kanji: "カメラ", kana: "カメラ", meaning: "Máy ảnh" },
-  { kanji: "時計", kana: "とけい", meaning: "Đồng hồ" },
-  { kanji: "財布", kana: "さいふ", meaning: "Ví tiền" },
-  { kanji: "鍵", kana: "かぎ", meaning: "Chìa khóa" },
-  { kanji: "傘", kana: "かさ", meaning: "Ô, dù" },
-  { kanji: "服", kana: "ふく", meaning: "Quần áo" },
-  { kanji: "靴", kana: "くつ", meaning: "Giày" },
-  { kanji: "帽子", kana: "ぼうし", meaning: "Mũ" },
-  { kanji: "ご飯", kana: "ごはん", meaning: "Cơm, bữa ăn" },
-  { kanji: "パン", kana: "パン", meaning: "Bánh mì" },
-  { kanji: "水", kana: "みず", meaning: "Nước" },
-  { kanji: "お茶", kana: "おちゃ", meaning: "Trà" },
-  { kanji: "コーヒー", kana: "コーヒー", meaning: "Cà phê" },
-  { kanji: "ビール", kana: "ビール", meaning: "Bia" },
-  { kanji: "肉", kana: "にく", meaning: "Thịt" },
-  { kanji: "魚", kana: "さかな", meaning: "Cá" },
-  { kanji: "野菜", kana: "やさい", meaning: "Rau" },
-  { kanji: "果物", kana: "くだもの", meaning: "Trái cây" },
-  { kanji: "卵", kana: "たまご", meaning: "Trứng" },
-  // --- ĐỘNG TỪ CƠ BẢN ---
-  { kanji: "食べます", kana: "たべます", meaning: "Ăn" },
-  { kanji: "飲みます", kana: "のみます", meaning: "Uống" },
-  { kanji: "行きます", kana: "いきます", meaning: "Đi" },
-  { kanji: "来ます", kana: "きます", meaning: "Đến" },
-  { kanji: "帰ります", kana: "かえります", meaning: "Về nhà" },
-  { kanji: "見ます", kana: "みます", meaning: "Nhìn, xem" },
-  { kanji: "聞きます", kana: "ききます", meaning: "Nghe, hỏi" },
-  { kanji: "話します", kana: "はなします", meaning: "Nói chuyện" },
-  { kanji: "読みます", kana: "よみます", meaning: "Đọc" },
-  { kanji: "書きます", kana: "かきます", meaning: "Viết" },
-  { kanji: "買います", kana: "かいます", meaning: "Mua" },
-  { kanji: "売ります", kana: "うります", meaning: "Bán" },
-  { kanji: "作ります", kana: "つくります", meaning: "Làm, tạo" },
-  { kanji: "使います", kana: "つかいます", meaning: "Sử dụng" },
-  { kanji: "教えます", kana: "おしえます", meaning: "Dạy, chỉ" },
-  { kanji: "習います", kana: "ならいます", meaning: "Học (từ thầy)" },
-  { kanji: "勉強します", kana: "べんきょうします", meaning: "Học bài" },
-  { kanji: "仕事します", kana: "しごとします", meaning: "Làm việc" },
-  { kanji: "起きます", kana: "おきます", meaning: "Thức dậy" },
-  { kanji: "寝ます", kana: "ねます", meaning: "Ngủ" },
-  { kanji: "休みます", kana: "やすみます", meaning: "Nghỉ ngơi" },
-  { kanji: "あります", kana: "あります", meaning: "Có (vật không sống)" },
-  { kanji: "います", kana: "います", meaning: "Có (người/động vật)" },
-  { kanji: "わかります", kana: "わかります", meaning: "Hiểu" },
-  // --- TÍNH TỪ ---
-  { kanji: "大きい", kana: "おおきい", meaning: "To, lớn" },
-  { kanji: "小さい", kana: "ちいさい", meaning: "Nhỏ bé" },
-  { kanji: "長い", kana: "ながい", meaning: "Dài" },
-  { kanji: "短い", kana: "みじかい", meaning: "Ngắn" },
-  { kanji: "高い", kana: "たかい", meaning: "Cao, đắt" },
-  { kanji: "低い", kana: "ひくい", meaning: "Thấp" },
-  { kanji: "安い", kana: "やすい", meaning: "Rẻ" },
-  { kanji: "新しい", kana: "あたらしい", meaning: "Mới" },
-  { kanji: "古い", kana: "ふるい", meaning: "Cũ" },
-  { kanji: "若い", kana: "わかい", meaning: "Trẻ" },
-  { kanji: "いい", kana: "いい", meaning: "Tốt" },
-  { kanji: "悪い", kana: "わるい", meaning: "Xấu, tồi" },
-  { kanji: "暑い", kana: "あつい", meaning: "Nóng (thời tiết)" },
-  { kanji: "寒い", kana: "さむい", meaning: "Lạnh" },
-  { kanji: "暖かい", kana: "あたたかい", meaning: "Ấm áp" },
-  { kanji: "涼しい", kana: "すずしい", meaning: "Mát mẻ" },
-  { kanji: "難しい", kana: "むずかしい", meaning: "Khó" },
-  { kanji: "易しい", kana: "やさしい", meaning: "Dễ" },
-  { kanji: "楽しい", kana: "たのしい", meaning: "Vui vẻ" },
-  { kanji: "面白い", kana: "おもしろい", meaning: "Thú vị" },
-  { kanji: "忙しい", kana: "いそがしい", meaning: "Bận rộn" },
-  // --- TÍNH TỪ ĐUÔI な ---
-  { kanji: "きれい", kana: "きれい", meaning: "Đẹp, sạch sẽ" },
-  { kanji: "有名", kana: "ゆうめい", meaning: "Nổi tiếng" },
-  { kanji: "元気", kana: "げんき", meaning: "Khỏe, sôi nổi" },
-  { kanji: "好き", kana: "すき", meaning: "Thích" },
-  { kanji: "嫌い", kana: "きらい", meaning: "Ghét, không thích" },
-  { kanji: "上手", kana: "じょうず", meaning: "Giỏi" },
-  { kanji: "下手", kana: "へた", meaning: "Kém, dở" },
-  { kanji: "大丈夫", kana: "だいじょうぶ", meaning: "Không sao, ổn" },
-  { kanji: "大切", kana: "たいせつ", meaning: "Quan trọng" },
-  { kanji: "親切", kana: "しんせつ", meaning: "Tốt bụng" },
-  { kanji: "静か", kana: "しずか", meaning: "Yên tĩnh" },
-  { kanji: "賑やか", kana: "にぎやか", meaning: "Náo nhiệt" },
-  { kanji: "便利", kana: "べんり", meaning: "Tiện lợi" },
-  { kanji: "暇", kana: "ひま", meaning: "Rảnh rỗi" },
-  // --- SỐ ĐẾM ---
-  { kanji: "一", kana: "いち", meaning: "1 (một)" },
-  { kanji: "二", kana: "に", meaning: "2 (hai)" },
-  { kanji: "三", kana: "さん", meaning: "3 (ba)" },
-  { kanji: "四", kana: "し / よん", meaning: "4 (bốn)" },
-  { kanji: "五", kana: "ご", meaning: "5 (năm)" },
-  { kanji: "六", kana: "ろく", meaning: "6 (sáu)" },
-  { kanji: "七", kana: "しち / なな", meaning: "7 (bảy)" },
-  { kanji: "八", kana: "はち", meaning: "8 (tám)" },
-  { kanji: "九", kana: "く / きゅう", meaning: "9 (chín)" },
-  { kanji: "十", kana: "じゅう", meaning: "10 (mười)" },
-  { kanji: "百", kana: "ひゃく", meaning: "100 (một trăm)" },
-  { kanji: "千", kana: "せん", meaning: "1000 (một nghìn)" },
-  { kanji: "万", kana: "まん", meaning: "10.000 (mười nghìn)" },
-  // --- VỊ TRÍ ---
-  { kanji: "ここ", kana: "ここ", meaning: "Đây, nơi này" },
-  { kanji: "そこ", kana: "そこ", meaning: "Đó, nơi đó" },
-  { kanji: "あそこ", kana: "あそこ", meaning: "Kia, nơi kia" },
-  { kanji: "どこ", kana: "どこ", meaning: "Đâu, nơi nào" },
-  { kanji: "右", kana: "みぎ", meaning: "Bên phải" },
-  { kanji: "左", kana: "ひだり", meaning: "Bên trái" },
-  { kanji: "前", kana: "まえ", meaning: "Phía trước" },
-  { kanji: "後ろ", kana: "うしろ", meaning: "Phía sau" },
-  { kanji: "上", kana: "うえ", meaning: "Phía trên" },
-  { kanji: "下", kana: "した", meaning: "Phía dưới" },
-  { kanji: "中", kana: "なか", meaning: "Bên trong" },
-  { kanji: "外", kana: "そと", meaning: "Bên ngoài" },
-  { kanji: "隣", kana: "となり", meaning: "Kề bên" },
-  { kanji: "近く", kana: "ちかく", meaning: "Gần đây" },
-  { kanji: "遠く", kana: "とおく", meaning: "Xa xôi" },
-  // --- TRẠNG THÁI & CẢM XÚC ---
-  { kanji: "嬉しい", kana: "うれしい", meaning: "Vui mừng" },
-  { kanji: "悲しい", kana: "かなしい", meaning: "Buồn" },
-  { kanji: "寂しい", kana: "さびしい", meaning: "Cô đơn" },
-  { kanji: "恥ずかしい", kana: "はずかしい", meaning: "Xấu hổ" },
-  { kanji: "怖い", kana: "こわい", meaning: "Sợ hãi" },
-  { kanji: "痛い", kana: "いたい", meaning: "Đau" },
-  { kanji: "眠い", kana: "ねむい", meaning: "Buồn ngủ" },
-  // --- PHÓ TỪ & TỪ NỐI ---
-  { kanji: "とても", kana: "とても", meaning: "Rất, lắm" },
-  { kanji: "少し", kana: "すこし", meaning: "Một chút" },
-  { kanji: "たくさん", kana: "たくさん", meaning: "Nhiều" },
-  { kanji: "もう", kana: "もう", meaning: "Đã, rồi" },
-  { kanji: "まだ", kana: "まだ", meaning: "Chưa" },
-  { kanji: "また", kana: "また", meaning: "Lại, hẹn gặp lại" },
-  { kanji: "もっと", kana: "もっと", meaning: "Hơn nữa" },
-  { kanji: "一番", kana: "いちばん", meaning: "Nhất, số 1" },
-  { kanji: "全部", kana: "ぜんぶ", meaning: "Toàn bộ, tất cả" },
-  { kanji: "一緒に", kana: "いっしょに", meaning: "Cùng nhau" },
-  { kanji: "だから", kana: "だから", meaning: "Vì thế" },
-  { kanji: "でも", kana: "でも", meaning: "Nhưng, tuy nhiên" },
-  { kanji: "そして", kana: "そして", meaning: "Và, thêm nữa" },
-  { kanji: "それから", kana: "それから", meaning: "Sau đó" },
-  { kanji: "だいたい", kana: "だいたい", meaning: "Đại khái, khoảng" },
-  { kanji: "本当に", kana: "ほんとうに", meaning: "Thật sự" },
-  { kanji: "多分", kana: "たぶん", meaning: "Có lẽ" },
-  { kanji: "きっと", kana: "きっと", meaning: "Chắc chắn" },
-  { kanji: "ゆっくり", kana: "ゆっくり", meaning: "Chậm rãi, thong thả" },
-  { kanji: "すぐ", kana: "すぐ", meaning: "Ngay lập tức" },
-  { kanji: "初めて", kana: "はじめて", meaning: "Lần đầu tiên" },
-  // --- BỘ PHẬN CƠ THỂ ---
-  { kanji: "頭", kana: "あたま", meaning: "Đầu" },
-  { kanji: "顔", kana: "かお", meaning: "Khuôn mặt" },
-  { kanji: "目", kana: "め", meaning: "Mắt" },
-  { kanji: "耳", kana: "みみ", meaning: "Tai" },
-  { kanji: "口", kana: "くち", meaning: "Miệng" },
-  { kanji: "鼻", kana: "はな", meaning: "Mũi" },
-  { kanji: "手", kana: "て", meaning: "Tay" },
-  { kanji: "足", kana: "あし", meaning: "Chân" },
-  { kanji: "お腹", kana: "おなか", meaning: "Bụng" },
-  { kanji: "病気", kana: "びょうき", meaning: "Bệnh tật, ốm" },
-  { kanji: "風邪", kana: "かぜ", meaning: "Cảm cúm" },
-  { kanji: "薬", kana: "くすり", meaning: "Thuốc" },
-  // --- GIẢI TRÍ ---
-  { kanji: "音楽", kana: "おんがく", meaning: "Âm nhạc" },
-  { kanji: "映画", kana: "えいが", meaning: "Phim ảnh" },
-  { kanji: "写真", kana: "しゃしん", meaning: "Ảnh, bức ảnh" },
-  { kanji: "スポーツ", kana: "スポーツ", meaning: "Thể thao" },
-  { kanji: "旅行", kana: "りょこう", meaning: "Du lịch" },
-  { kanji: "宿題", kana: "しゅくだい", meaning: "Bài tập về nhà" },
-  { kanji: "試験", kana: "しけん", meaning: "Kỳ thi" },
-  // --- THIÊN NHIÊN ---
-  { kanji: "天気", kana: "てんき", meaning: "Thời tiết" },
-  { kanji: "雨", kana: "あめ", meaning: "Mưa" },
-  { kanji: "雪", kana: "ゆき", meaning: "Tuyết" },
-  { kanji: "花", kana: "はな", meaning: "Hoa" },
-  { kanji: "木", kana: "き", meaning: "Cây" },
-  { kanji: "犬", kana: "いぬ", meaning: "Con chó" },
-  { kanji: "猫", kana: "ねこ", meaning: "Con mèo" },
-  { kanji: "動物", kana: "どうぶつ", meaning: "Động vật" },
-  // --- GIAO TIẾP ---
-  { kanji: "おめでとうございます", kana: "おめでとうございます", meaning: "Chúc mừng" },
-  { kanji: "お大事に", kana: "おだいじに", meaning: "Chúc mau khỏe" },
-  { kanji: "お疲れ様", kana: "おつかれさま", meaning: "Bạn đã vất vả rồi" },
-  { kanji: "失礼します", kana: "しつれいします", meaning: "Xin phép (ra vào)" },
-  { kanji: "すみません", kana: "すみません", meaning: "Xin lỗi / Cho hỏi" },
-  { kanji: "お願いします", kana: "おねがいします", meaning: "Làm ơn / Nhờ bạn" },
-  { kanji: "ただいま", kana: "ただいま", meaning: "Tôi đã về" },
-  { kanji: "行ってきます", kana: "いってきます", meaning: "Tôi đi đây" },
-  // --- THÊM TỪ VỰNG ---
-  { kanji: "外国人", kana: "がいこくじん", meaning: "Người nước ngoài" },
-  { kanji: "留学生", kana: "りゅうがくせい", meaning: "Du học sinh" },
-  { kanji: "地下鉄", kana: "ちかてつ", meaning: "Tàu điện ngầm" },
-  { kanji: "新幹線", kana: "しんかんせん", meaning: "Tàu cao tốc Shinkansen" },
-  { kanji: "映画館", kana: "えいがかん", meaning: "Rạp chiếu phim" },
-  { kanji: "大使館", kana: "たいしかん", meaning: "Đại sứ quán" },
-  { kanji: "神社", kana: "じんじゃ", meaning: "Đền thờ thần đạo" },
-  { kanji: "お寺", kana: "おてら", meaning: "Chùa" },
-  { kanji: "交差点", kana: "こうさてん", meaning: "Ngã tư" },
-  { kanji: "信号", kana: "しんごう", meaning: "Đèn giao thông" },
-  { kanji: "料理", kana: "りょうり", meaning: "Món ăn, nấu ăn" },
-  { kanji: "冷蔵庫", kana: "れいぞうこ", meaning: "Tủ lạnh" },
-  { kanji: "洗濯機", kana: "せんたくき", meaning: "Máy giặt" },
-  { kanji: "エアコン", kana: "エアコン", meaning: "Máy điều hòa" },
-  { kanji: "パソコン", kana: "パソコン", meaning: "Máy tính cá nhân" },
-  { kanji: "安全", kana: "あんぜん", meaning: "An toàn" },
-  { kanji: "危険", kana: "きけん", meaning: "Nguy hiểm" },
-  { kanji: "健康", kana: "けんこう", meaning: "Sức khỏe" },
-  { kanji: "将来", kana: "しょうらい", meaning: "Tương lai" },
-  { kanji: "経験", kana: "けいけん", meaning: "Kinh nghiệm" },
-  { kanji: "理由", kana: "りゆう", meaning: "Lý do" },
-  { kanji: "意味", kana: "いみ", meaning: "Ý nghĩa" },
-  { kanji: "約束", kana: "やくそく", meaning: "Lời hứa, cuộc hẹn" },
-  { kanji: "趣味", kana: "しゅみ", meaning: "Sở thích" },
-  { kanji: "習慣", kana: "しゅうかん", meaning: "Thói quen" },
-  { kanji: "最近", kana: "さいきん", meaning: "Gần đây" },
-  { kanji: "最後", kana: "さいご", meaning: "Cuối cùng" },
-  { kanji: "最初", kana: "さいしょ", meaning: "Đầu tiên" },
-  { kanji: "問題", kana: "もんだい", meaning: "Vấn đề, bài toán" },
-  { kanji: "答え", kana: "こたえ", meaning: "Câu trả lời" },
-  { kanji: "考えます", kana: "かんがえます", meaning: "Suy nghĩ, tư duy" },
-  { kanji: "覚えます", kana: "おぼえます", meaning: "Ghi nhớ" },
-  { kanji: "忘れます", kana: "わすれます", meaning: "Quên" },
-  { kanji: "準備します", kana: "じゅんびします", meaning: "Chuẩn bị" },
-  { kanji: "練習します", kana: "れんしゅうします", meaning: "Luyện tập" },
-  { kanji: "乗り換えます", kana: "のりかえます", meaning: "Chuyển tàu, xe" },
-  { kanji: "掃除します", kana: "そうじします", meaning: "Dọn vệ sinh" },
-  { kanji: "洗濯します", kana: "せんたくします", meaning: "Giặt giũ" },
-  { kanji: "一日", kana: "ついたち", meaning: "Ngày mồng 1" },
-  { kanji: "二日", kana: "ふつか", meaning: "Ngày mồng 2" },
-  { kanji: "三日", kana: "みっか", meaning: "Ngày mồng 3" },
-  { kanji: "四日", kana: "よっか", meaning: "Ngày mồng 4" },
-  { kanji: "五日", kana: "いつか", meaning: "Ngày mồng 5" },
-  { kanji: "六日", kana: "むいか", meaning: "Ngày mồng 6" },
-  { kanji: "七日", kana: "なのか", meaning: "Ngày mồng 7" },
-  { kanji: "八日", kana: "ようか", meaning: "Ngày mồng 8" },
-  { kanji: "九日", kana: "ここのか", meaning: "Ngày mồng 9" },
-  { kanji: "十日", kana: "とおか", meaning: "Ngày mồng 10" },
-  { kanji: "二十日", kana: "はつか", meaning: "Ngày 20" },
-  { kanji: "一つ", kana: "ひとつ", meaning: "1 cái (vật chung)" },
-  { kanji: "二つ", kana: "ふたつ", meaning: "2 cái" },
-  { kanji: "三つ", kana: "みっつ", meaning: "3 cái" },
-  { kanji: "四つ", kana: "よっつ", meaning: "4 cái" },
-  { kanji: "五つ", kana: "いつつ", meaning: "5 cái" },
-  { kanji: "一人", kana: "ひとり", meaning: "1 người" },
-  { kanji: "二人", kana: "ふたり", meaning: "2 người" },
-  { kanji: "正月", kana: "しょうがつ", meaning: "Ngày Tết" },
-  { kanji: "お祭り", kana: "おまつり", meaning: "Lễ hội" },
-  { kanji: "乾杯", kana: "かんぱい", meaning: "Cạn chén / Nâng ly" },
-  { kanji: "赤", kana: "あか", meaning: "Màu đỏ" },
-  { kanji: "青", kana: "あお", meaning: "Màu xanh" },
-  { kanji: "白", kana: "しろ", meaning: "Màu trắng" },
-  { kanji: "黒", kana: "くろ", meaning: "Màu đen" },
-  { kanji: "色", kana: "いろ", meaning: "Màu sắc" },
-  { kanji: "時々", kana: "ときどき", meaning: "Thỉnh thoảng" },
-  { kanji: "全然", kana: "ぜんぜん", meaning: "Hoàn toàn không" },
-  { kanji: "絶対", kana: "ぜったい", meaning: "Tuyệt đối, nhất định" },
-  { kanji: "一生懸命", kana: "いっしょうけんめい", meaning: "Cố gắng hết sức" },
-];
-
-// =============================================================
-// INLINE SVG ICONS (thay thế lucide-react)
-// =============================================================
-function Svg({ children, size = 20, className = "" }) {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size}
-         viewBox="0 0 24 24" fill="none" stroke="currentColor"
-         strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-         className={className}>{children}</svg>
-  );
-}
-const BookOpenIcon = ({ size, className }) => <Svg size={size} className={className}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></Svg>;
-const GradCapIcon  = ({ size, className }) => <Svg size={size} className={className}><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></Svg>;
-const PlayIcon     = ({ size, className }) => <Svg size={size} className={className}><polygon points="5 3 19 12 5 21 5 3"/></Svg>;
-const TrophyIcon   = ({ size, className }) => <Svg size={size} className={className}><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></Svg>;
-const ArrowRightIcon=({ size, className }) => <Svg size={size} className={className}><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></Svg>;
-const AlertIcon    = ({ size, className }) => <Svg size={size} className={className}><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></Svg>;
-const VolumeIcon   = ({ size, className }) => <Svg size={size} className={className}><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></Svg>;
-const SparklesIcon = ({ size, className }) => <Svg size={size} className={className}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></Svg>;
-const LoaderIcon   = ({ size, className }) => <Svg size={size} className={className}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></Svg>;
-const CheckCircleIcon=({size,className})   => <Svg size={size} className={className}><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></Svg>;
-const XCircleIcon  = ({ size, className }) => <Svg size={size} className={className}><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></Svg>;
-const RotateCcwIcon= ({ size, className }) => <Svg size={size} className={className}><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></Svg>;
-
-// =============================================================
-// APP COMPONENT
-// =============================================================
-function App() {
-  // Vocabulary state
-  const [words, setWords]               = useState([]);
-  const [wordStatuses, setWordStatuses] = useState({});
-  const [lastBatch, setLastBatch]       = useState([]);
-  const [appLoading, setAppLoading]     = useState(true);
-  const [sheetError, setSheetError]     = useState(false);
-
-  // Navigation
-  const [currentMode, setCurrentMode] = useState('menu');
-
-  // Learning state
-  const [learningBatch, setLearningBatch]   = useState([]);
-  const [learningIndex, setLearningIndex]   = useState(0);
-  const [isFlipped, setIsFlipped]           = useState(false);
-  const [isReviewSession, setIsReviewSession] = useState(false);
-
-  // Quiz state
-  const [quizQuestions, setQuizQuestions]     = useState([]);
-  const [currentQuizIndex, setCurrentQuizIndex] = useState(0);
-  const [quizScore, setQuizScore]             = useState(0);
-  const [selectedAnswer, setSelectedAnswer]   = useState(null);
-
-  // UI state
-  const [showResetConfirm, setShowResetConfirm] = useState(false);
-
-  // AI state
-  const [aiLoading, setAiLoading] = useState(false);
-  const [aiData, setAiData]       = useState(null);
-  const [aiError, setAiError]     = useState("");
-
-  const BATCH_SIZE = 10;
-
-  // ----- Derived values -----
-  const newWords     = words.filter(w => !wordStatuses[w.kanji] || wordStatuses[w.kanji] === 'new');
-  const reviewWords  = words.filter(w => wordStatuses[w.kanji] === 'review');
-  const learnedCount = words.filter(w => ['learned','review','mastered'].includes(wordStatuses[w.kanji])).length;
-  const masteredCount= words.filter(w => wordStatuses[w.kanji] === 'mastered').length;
-  const totalWords   = words.length;
-
-  // ----- Initialization -----
-  useEffect(() => {
-    async function init() {
-      const localStatuses  = lsGet('n5_statuses', {});
-      const localLastBatch = lsGet('n5_last_batch', []);
-      setLastBatch(localLastBatch);
-
-      const sheetData = await fetchVocabulary();
-      if (sheetData) {
-        const vocab = sheetData.map(({ kanji, kana, meaning }) => ({ kanji, kana, meaning }));
-        const statuses = {};
-        sheetData.forEach(w => { if (w.kanji) statuses[w.kanji] = w.status || 'new'; });
-        setWords(vocab);
-        setWordStatuses(statuses);
-        lsSet('n5_statuses', statuses);
-        lsSet('n5_words_cache', vocab);
-      } else {
-        if (CONFIG.APPS_SCRIPT_URL) setSheetError(true);
-        const cachedWords = lsGet('n5_words_cache', null);
-        setWords(cachedWords || N5_WORDS_FALLBACK);
-        setWordStatuses(localStatuses);
-      }
-
-      setAppLoading(false);
-      const splash = document.getElementById('splash');
-      if (splash) { splash.classList.add('hidden'); setTimeout(() => splash.remove(), 500); }
+    // =============================================================
+    // LOCALSTORAGE HELPERS (safe — handles private/incognito mode)
+    // =============================================================
+    function lsGet(key, def) {
+      try {
+        const v = localStorage.getItem(key);
+        return v !== null ? JSON.parse(v) : def;
+      } catch { return def; }
     }
-    init();
-  }, []);
+    function lsSet(key, val) {
+      try { localStorage.setItem(key, JSON.stringify(val)); } catch { }
+    }
+    function lsClear() {
+      try {
+        ['n5_statuses', 'n5_last_batch', 'n5_words_cache'].forEach(k => localStorage.removeItem(k));
+      } catch { }
+    }
 
-  // Sync statuses to localStorage when changed
-  useEffect(() => {
-    if (!appLoading) lsSet('n5_statuses', wordStatuses);
-  }, [wordStatuses, appLoading]);
+    // =============================================================
+    // API — Google Apps Script
+    // =============================================================
+    async function fetchVocabulary() {
+      if (!CONFIG.APPS_SCRIPT_URL) return null;
+      try {
+        const res = await fetch(CONFIG.APPS_SCRIPT_URL + (CONFIG.APPS_SCRIPT_URL.includes('?') ? '&' : '?') + '_t=' + Date.now());
+        if (!res.ok) return null;
+        const data = await res.json();
+        if (!Array.isArray(data) || data.length === 0) return null;
+        return data;
+      } catch { return null; }
+    }
 
-  // ----- Status update -----
-  const updateStatus = useCallback((kanji, status) => {
-    setWordStatuses(prev => ({ ...prev, [kanji]: status }));
-    pushStatus(kanji, status);
-  }, []);
+    // Fire-and-forget: ghi trạng thái về sheet (no-cors tránh CORS preflight)
+    function pushStatus(kanji, status) {
+      if (!CONFIG.APPS_SCRIPT_URL) return;
+      fetch(CONFIG.APPS_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: JSON.stringify({ kanji, status }),
+      }).catch(() => { });
+    }
 
-  // ----- Speech synthesis -----
-  const playPronunciation = (text, fallback, e) => {
-    if (e) e.stopPropagation();
-    if (!('speechSynthesis' in window)) return;
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text || fallback);
-    utterance.lang = 'ja-JP';
-    utterance.rate = 0.85;
-    utterance.pitch = 1.0;
-    const voices = window.speechSynthesis.getVoices();
-    const jaVoice = voices.find(v => v.lang === 'ja-JP' && (v.name.includes('Google') || v.name.includes('Microsoft') || v.name.includes('Kyoko')))
-      || voices.find(v => v.lang.startsWith('ja'));
-    if (jaVoice) utterance.voice = jaVoice;
-    window.speechSynthesis.speak(utterance);
-  };
+    // =============================================================
+    // VOCABULARY FALLBACK (từ react.md — dùng khi không có Google Sheets)
+    // =============================================================
+    const N5_WORDS_FALLBACK = [
+      // --- QUỐC GIA & NGÔN NGỮ ---
+      { kanji: "ベトナム", kana: "ベトナム", meaning: "Việt Nam" },
+      { kanji: "日本", kana: "にほん", meaning: "Nhật Bản" },
+      { kanji: "中国", kana: "ちゅうごく", meaning: "Trung Quốc" },
+      { kanji: "韓国", kana: "かんこく", meaning: "Hàn Quốc" },
+      { kanji: "タイ", kana: "タイ", meaning: "Thái Lan" },
+      { kanji: "フランス", kana: "フランス", meaning: "Nước Pháp" },
+      { kanji: "日本語", kana: "にほんご", meaning: "Tiếng Nhật" },
+      { kanji: "英語", kana: "えいご", meaning: "Tiếng Anh" },
+      // --- ĐẠI TỪ & NGƯỜI ---
+      { kanji: "私", kana: "わたし", meaning: "Tôi" },
+      { kanji: "あなた", kana: "あなた", meaning: "Bạn" },
+      { kanji: "あの人", kana: "あのひと", meaning: "Người kia" },
+      { kanji: "あの方", kana: "あのかた", meaning: "Vị kia (lịch sự)" },
+      { kanji: "皆さん", kana: "みなさん", meaning: "Mọi người" },
+      { kanji: "男の人", kana: "おとこのひと", meaning: "Người đàn ông" },
+      { kanji: "女の人", kana: "おんなのひと", meaning: "Người phụ nữ" },
+      { kanji: "男の子", kana: "おとこのこ", meaning: "Cậu bé" },
+      { kanji: "女の子", kana: "おんなのこ", meaning: "Cô bé" },
+      { kanji: "子ども", kana: "こども", meaning: "Trẻ em, con cái" },
+      { kanji: "友達", kana: "ともだち", meaning: "Bạn bè" },
+      { kanji: "恋人", kana: "こいびと", meaning: "Người yêu" },
+      { kanji: "大人", kana: "おとな", meaning: "Người lớn" },
+      { kanji: "誰", kana: "だれ", meaning: "Ai" },
+      { kanji: "どなた", kana: "どなた", meaning: "Ai (lịch sự)" },
+      // --- GIA ĐÌNH ---
+      { kanji: "家族", kana: "かぞく", meaning: "Gia đình" },
+      { kanji: "父", kana: "ちち", meaning: "Bố (của mình)" },
+      { kanji: "母", kana: "はは", meaning: "Mẹ (của mình)" },
+      { kanji: "兄", kana: "あに", meaning: "Anh trai (của mình)" },
+      { kanji: "姉", kana: "あね", meaning: "Chị gái (của mình)" },
+      { kanji: "弟", kana: "おとうと", meaning: "Em trai (của mình)" },
+      { kanji: "妹", kana: "いもうと", meaning: "Em gái (của mình)" },
+      { kanji: "お父さん", kana: "おとうさん", meaning: "Bố (của người khác)" },
+      { kanji: "お母さん", kana: "おかあさん", meaning: "Mẹ (của người khác)" },
+      { kanji: "お兄さん", kana: "おにいさん", meaning: "Anh trai (của người khác)" },
+      { kanji: "お姉さん", kana: "おねえさん", meaning: "Chị gái (của người khác)" },
+      { kanji: "祖父", kana: "そふ", meaning: "Ông (của mình)" },
+      { kanji: "祖母", kana: "そぼ", meaning: "Bà (của mình)" },
+      { kanji: "両親", kana: "りょうしん", meaning: "Bố mẹ" },
+      { kanji: "兄弟", kana: "きょうだい", meaning: "Anh em" },
+      // --- NGHỀ NGHIỆP ---
+      { kanji: "先生", kana: "せんせい", meaning: "Giáo viên" },
+      { kanji: "教師", kana: "きょうし", meaning: "Giáo viên (nghề nghiệp)" },
+      { kanji: "学生", kana: "がくせい", meaning: "Học sinh, sinh viên" },
+      { kanji: "会社員", kana: "かいしゃいん", meaning: "Nhân viên công ty" },
+      { kanji: "銀行員", kana: "ぎんこういん", meaning: "Nhân viên ngân hàng" },
+      { kanji: "医者", kana: "いしゃ", meaning: "Bác sĩ" },
+      { kanji: "職員", kana: "しょくいん", meaning: "Nhân viên, công chức" },
+      { kanji: "作家", kana: "さっか", meaning: "Nhà văn, tác giả" },
+      { kanji: "運転手", kana: "うんてんしゅ", meaning: "Tài xế" },
+      { kanji: "エンジニア", kana: "エンジニア", meaning: "Kỹ sư" },
+      { kanji: "店員", kana: "てんいん", meaning: "Nhân viên cửa hàng" },
+      { kanji: "歌手", kana: "かしゅ", meaning: "Ca sĩ" },
+      { kanji: "社長", kana: "しゃちょう", meaning: "Giám đốc" },
+      { kanji: "部長", kana: "ぶちょう", meaning: "Trưởng phòng" },
+      // --- THỜI GIAN ---
+      { kanji: "今", kana: "いま", meaning: "Bây giờ" },
+      { kanji: "朝", kana: "あさ", meaning: "Buổi sáng" },
+      { kanji: "昼", kana: "ひる", meaning: "Buổi trưa" },
+      { kanji: "夜", kana: "よる", meaning: "Buổi tối" },
+      { kanji: "午前", kana: "ごぜん", meaning: "Sáng (A.M)" },
+      { kanji: "午後", kana: "ごご", meaning: "Chiều (P.M)" },
+      { kanji: "今日", kana: "きょう", meaning: "Hôm nay" },
+      { kanji: "明日", kana: "あした", meaning: "Ngày mai" },
+      { kanji: "明後日", kana: "あさって", meaning: "Ngày kia" },
+      { kanji: "昨日", kana: "きのう", meaning: "Hôm qua" },
+      { kanji: "一昨日", kana: "おととい", meaning: "Hôm kia" },
+      { kanji: "今朝", kana: "けさ", meaning: "Sáng nay" },
+      { kanji: "今晩", kana: "こんばん", meaning: "Tối nay" },
+      { kanji: "毎日", kana: "まいにち", meaning: "Mỗi ngày" },
+      { kanji: "毎朝", kana: "まいあさ", meaning: "Mỗi sáng" },
+      { kanji: "毎晩", kana: "まいばん", meaning: "Mỗi tối" },
+      { kanji: "先週", kana: "せんしゅう", meaning: "Tuần trước" },
+      { kanji: "今週", kana: "こんしゅう", meaning: "Tuần này" },
+      { kanji: "来週", kana: "らいしゅう", meaning: "Tuần sau" },
+      { kanji: "先月", kana: "せんげつ", meaning: "Tháng trước" },
+      { kanji: "今月", kana: "こんげつ", meaning: "Tháng này" },
+      { kanji: "来月", kana: "らいげつ", meaning: "Tháng sau" },
+      { kanji: "去年", kana: "きょねん", meaning: "Năm ngoái" },
+      { kanji: "今年", kana: "ことし", meaning: "Năm nay" },
+      { kanji: "来年", kana: "らいねん", meaning: "Năm sau" },
+      { kanji: "時間", kana: "じかん", meaning: "Thời gian" },
+      // --- ĐỊA ĐIỂM & ĐI LẠI ---
+      { kanji: "学校", kana: "がっこう", meaning: "Trường học" },
+      { kanji: "大学", kana: "だいがく", meaning: "Đại học" },
+      { kanji: "図書館", kana: "としょかん", meaning: "Thư viện" },
+      { kanji: "郵便局", kana: "ゆうびんきょく", meaning: "Bưu điện" },
+      { kanji: "病院", kana: "びょういん", meaning: "Bệnh viện" },
+      { kanji: "銀行", kana: "ぎんこう", meaning: "Ngân hàng" },
+      { kanji: "駅", kana: "えき", meaning: "Ga tàu" },
+      { kanji: "空港", kana: "くうこう", meaning: "Sân bay" },
+      { kanji: "ホテル", kana: "ホテル", meaning: "Khách sạn" },
+      { kanji: "店", kana: "みせ", meaning: "Cửa hàng" },
+      { kanji: "スーパー", kana: "スーパー", meaning: "Siêu thị" },
+      { kanji: "デパート", kana: "デパート", meaning: "Trung tâm thương mại" },
+      { kanji: "レストラン", kana: "レストラン", meaning: "Nhà hàng" },
+      { kanji: "公園", kana: "こうえん", meaning: "Công viên" },
+      { kanji: "海", kana: "うみ", meaning: "Biển" },
+      { kanji: "山", kana: "やま", meaning: "Núi" },
+      { kanji: "川", kana: "かわ", meaning: "Sông" },
+      { kanji: "橋", kana: "はし", meaning: "Cây cầu" },
+      { kanji: "道", kana: "みち", meaning: "Con đường" },
+      // --- ĐỒ VẬT & ĐỒ ĂN ---
+      { kanji: "車", kana: "くるま", meaning: "Xe ô tô" },
+      { kanji: "自転車", kana: "じてんしゃ", meaning: "Xe đạp" },
+      { kanji: "電車", kana: "でんしゃ", meaning: "Tàu điện" },
+      { kanji: "飛行機", kana: "ひこうき", meaning: "Máy bay" },
+      { kanji: "バス", kana: "バス", meaning: "Xe buýt" },
+      { kanji: "タクシー", kana: "タクシー", meaning: "Taxi" },
+      { kanji: "本", kana: "ほん", meaning: "Sách" },
+      { kanji: "雑誌", kana: "ざっし", meaning: "Tạp chí" },
+      { kanji: "新聞", kana: "しんぶん", meaning: "Báo" },
+      { kanji: "手紙", kana: "てがみ", meaning: "Thư" },
+      { kanji: "電話", kana: "でんわ", meaning: "Điện thoại" },
+      { kanji: "テレビ", kana: "テレビ", meaning: "Ti vi" },
+      { kanji: "ラジオ", kana: "ラジオ", meaning: "Đài radio" },
+      { kanji: "カメラ", kana: "カメラ", meaning: "Máy ảnh" },
+      { kanji: "時計", kana: "とけい", meaning: "Đồng hồ" },
+      { kanji: "財布", kana: "さいふ", meaning: "Ví tiền" },
+      { kanji: "鍵", kana: "かぎ", meaning: "Chìa khóa" },
+      { kanji: "傘", kana: "かさ", meaning: "Ô, dù" },
+      { kanji: "服", kana: "ふく", meaning: "Quần áo" },
+      { kanji: "靴", kana: "くつ", meaning: "Giày" },
+      { kanji: "帽子", kana: "ぼうし", meaning: "Mũ" },
+      { kanji: "ご飯", kana: "ごはん", meaning: "Cơm, bữa ăn" },
+      { kanji: "パン", kana: "パン", meaning: "Bánh mì" },
+      { kanji: "水", kana: "みず", meaning: "Nước" },
+      { kanji: "お茶", kana: "おちゃ", meaning: "Trà" },
+      { kanji: "コーヒー", kana: "コーヒー", meaning: "Cà phê" },
+      { kanji: "ビール", kana: "ビール", meaning: "Bia" },
+      { kanji: "肉", kana: "にく", meaning: "Thịt" },
+      { kanji: "魚", kana: "さかな", meaning: "Cá" },
+      { kanji: "野菜", kana: "やさい", meaning: "Rau" },
+      { kanji: "果物", kana: "くだもの", meaning: "Trái cây" },
+      { kanji: "卵", kana: "たまご", meaning: "Trứng" },
+      // --- ĐỘNG TỪ CƠ BẢN ---
+      { kanji: "食べます", kana: "たべます", meaning: "Ăn" },
+      { kanji: "飲みます", kana: "のみます", meaning: "Uống" },
+      { kanji: "行きます", kana: "いきます", meaning: "Đi" },
+      { kanji: "来ます", kana: "きます", meaning: "Đến" },
+      { kanji: "帰ります", kana: "かえります", meaning: "Về nhà" },
+      { kanji: "見ます", kana: "みます", meaning: "Nhìn, xem" },
+      { kanji: "聞きます", kana: "ききます", meaning: "Nghe, hỏi" },
+      { kanji: "話します", kana: "はなします", meaning: "Nói chuyện" },
+      { kanji: "読みます", kana: "よみます", meaning: "Đọc" },
+      { kanji: "書きます", kana: "かきます", meaning: "Viết" },
+      { kanji: "買います", kana: "かいます", meaning: "Mua" },
+      { kanji: "売ります", kana: "うります", meaning: "Bán" },
+      { kanji: "作ります", kana: "つくります", meaning: "Làm, tạo" },
+      { kanji: "使います", kana: "つかいます", meaning: "Sử dụng" },
+      { kanji: "教えます", kana: "おしえます", meaning: "Dạy, chỉ" },
+      { kanji: "習います", kana: "ならいます", meaning: "Học (từ thầy)" },
+      { kanji: "勉強します", kana: "べんきょうします", meaning: "Học bài" },
+      { kanji: "仕事します", kana: "しごとします", meaning: "Làm việc" },
+      { kanji: "起きます", kana: "おきます", meaning: "Thức dậy" },
+      { kanji: "寝ます", kana: "ねます", meaning: "Ngủ" },
+      { kanji: "休みます", kana: "やすみます", meaning: "Nghỉ ngơi" },
+      { kanji: "あります", kana: "あります", meaning: "Có (vật không sống)" },
+      { kanji: "います", kana: "います", meaning: "Có (người/động vật)" },
+      { kanji: "わかります", kana: "わかります", meaning: "Hiểu" },
+      // --- TÍNH TỪ ---
+      { kanji: "大きい", kana: "おおきい", meaning: "To, lớn" },
+      { kanji: "小さい", kana: "ちいさい", meaning: "Nhỏ bé" },
+      { kanji: "長い", kana: "ながい", meaning: "Dài" },
+      { kanji: "短い", kana: "みじかい", meaning: "Ngắn" },
+      { kanji: "高い", kana: "たかい", meaning: "Cao, đắt" },
+      { kanji: "低い", kana: "ひくい", meaning: "Thấp" },
+      { kanji: "安い", kana: "やすい", meaning: "Rẻ" },
+      { kanji: "新しい", kana: "あたらしい", meaning: "Mới" },
+      { kanji: "古い", kana: "ふるい", meaning: "Cũ" },
+      { kanji: "若い", kana: "わかい", meaning: "Trẻ" },
+      { kanji: "いい", kana: "いい", meaning: "Tốt" },
+      { kanji: "悪い", kana: "わるい", meaning: "Xấu, tồi" },
+      { kanji: "暑い", kana: "あつい", meaning: "Nóng (thời tiết)" },
+      { kanji: "寒い", kana: "さむい", meaning: "Lạnh" },
+      { kanji: "暖かい", kana: "あたたかい", meaning: "Ấm áp" },
+      { kanji: "涼しい", kana: "すずしい", meaning: "Mát mẻ" },
+      { kanji: "難しい", kana: "むずかしい", meaning: "Khó" },
+      { kanji: "易しい", kana: "やさしい", meaning: "Dễ" },
+      { kanji: "楽しい", kana: "たのしい", meaning: "Vui vẻ" },
+      { kanji: "面白い", kana: "おもしろい", meaning: "Thú vị" },
+      { kanji: "忙しい", kana: "いそがしい", meaning: "Bận rộn" },
+      // --- TÍNH TỪ ĐUÔI な ---
+      { kanji: "きれい", kana: "きれい", meaning: "Đẹp, sạch sẽ" },
+      { kanji: "有名", kana: "ゆうめい", meaning: "Nổi tiếng" },
+      { kanji: "元気", kana: "げんき", meaning: "Khỏe, sôi nổi" },
+      { kanji: "好き", kana: "すき", meaning: "Thích" },
+      { kanji: "嫌い", kana: "きらい", meaning: "Ghét, không thích" },
+      { kanji: "上手", kana: "じょうず", meaning: "Giỏi" },
+      { kanji: "下手", kana: "へた", meaning: "Kém, dở" },
+      { kanji: "大丈夫", kana: "だいじょうぶ", meaning: "Không sao, ổn" },
+      { kanji: "大切", kana: "たいせつ", meaning: "Quan trọng" },
+      { kanji: "親切", kana: "しんせつ", meaning: "Tốt bụng" },
+      { kanji: "静か", kana: "しずか", meaning: "Yên tĩnh" },
+      { kanji: "賑やか", kana: "にぎやか", meaning: "Náo nhiệt" },
+      { kanji: "便利", kana: "べんり", meaning: "Tiện lợi" },
+      { kanji: "暇", kana: "ひま", meaning: "Rảnh rỗi" },
+      // --- SỐ ĐẾM ---
+      { kanji: "一", kana: "いち", meaning: "1 (một)" },
+      { kanji: "二", kana: "に", meaning: "2 (hai)" },
+      { kanji: "三", kana: "さん", meaning: "3 (ba)" },
+      { kanji: "四", kana: "し / よん", meaning: "4 (bốn)" },
+      { kanji: "五", kana: "ご", meaning: "5 (năm)" },
+      { kanji: "六", kana: "ろく", meaning: "6 (sáu)" },
+      { kanji: "七", kana: "しち / なな", meaning: "7 (bảy)" },
+      { kanji: "八", kana: "はち", meaning: "8 (tám)" },
+      { kanji: "九", kana: "く / きゅう", meaning: "9 (chín)" },
+      { kanji: "十", kana: "じゅう", meaning: "10 (mười)" },
+      { kanji: "百", kana: "ひゃく", meaning: "100 (một trăm)" },
+      { kanji: "千", kana: "せん", meaning: "1000 (một nghìn)" },
+      { kanji: "万", kana: "まん", meaning: "10.000 (mười nghìn)" },
+      // --- VỊ TRÍ ---
+      { kanji: "ここ", kana: "ここ", meaning: "Đây, nơi này" },
+      { kanji: "そこ", kana: "そこ", meaning: "Đó, nơi đó" },
+      { kanji: "あそこ", kana: "あそこ", meaning: "Kia, nơi kia" },
+      { kanji: "どこ", kana: "どこ", meaning: "Đâu, nơi nào" },
+      { kanji: "右", kana: "みぎ", meaning: "Bên phải" },
+      { kanji: "左", kana: "ひだり", meaning: "Bên trái" },
+      { kanji: "前", kana: "まえ", meaning: "Phía trước" },
+      { kanji: "後ろ", kana: "うしろ", meaning: "Phía sau" },
+      { kanji: "上", kana: "うえ", meaning: "Phía trên" },
+      { kanji: "下", kana: "した", meaning: "Phía dưới" },
+      { kanji: "中", kana: "なか", meaning: "Bên trong" },
+      { kanji: "外", kana: "そと", meaning: "Bên ngoài" },
+      { kanji: "隣", kana: "となり", meaning: "Kề bên" },
+      { kanji: "近く", kana: "ちかく", meaning: "Gần đây" },
+      { kanji: "遠く", kana: "とおく", meaning: "Xa xôi" },
+      // --- TRẠNG THÁI & CẢM XÚC ---
+      { kanji: "嬉しい", kana: "うれしい", meaning: "Vui mừng" },
+      { kanji: "悲しい", kana: "かなしい", meaning: "Buồn" },
+      { kanji: "寂しい", kana: "さびしい", meaning: "Cô đơn" },
+      { kanji: "恥ずかしい", kana: "はずかしい", meaning: "Xấu hổ" },
+      { kanji: "怖い", kana: "こわい", meaning: "Sợ hãi" },
+      { kanji: "痛い", kana: "いたい", meaning: "Đau" },
+      { kanji: "眠い", kana: "ねむい", meaning: "Buồn ngủ" },
+      // --- PHÓ TỪ & TỪ NỐI ---
+      { kanji: "とても", kana: "とても", meaning: "Rất, lắm" },
+      { kanji: "少し", kana: "すこし", meaning: "Một chút" },
+      { kanji: "たくさん", kana: "たくさん", meaning: "Nhiều" },
+      { kanji: "もう", kana: "もう", meaning: "Đã, rồi" },
+      { kanji: "まだ", kana: "まだ", meaning: "Chưa" },
+      { kanji: "また", kana: "また", meaning: "Lại, hẹn gặp lại" },
+      { kanji: "もっと", kana: "もっと", meaning: "Hơn nữa" },
+      { kanji: "一番", kana: "いちばん", meaning: "Nhất, số 1" },
+      { kanji: "全部", kana: "ぜんぶ", meaning: "Toàn bộ, tất cả" },
+      { kanji: "一緒に", kana: "いっしょに", meaning: "Cùng nhau" },
+      { kanji: "だから", kana: "だから", meaning: "Vì thế" },
+      { kanji: "でも", kana: "でも", meaning: "Nhưng, tuy nhiên" },
+      { kanji: "そして", kana: "そして", meaning: "Và, thêm nữa" },
+      { kanji: "それから", kana: "それから", meaning: "Sau đó" },
+      { kanji: "だいたい", kana: "だいたい", meaning: "Đại khái, khoảng" },
+      { kanji: "本当に", kana: "ほんとうに", meaning: "Thật sự" },
+      { kanji: "多分", kana: "たぶん", meaning: "Có lẽ" },
+      { kanji: "きっと", kana: "きっと", meaning: "Chắc chắn" },
+      { kanji: "ゆっくり", kana: "ゆっくり", meaning: "Chậm rãi, thong thả" },
+      { kanji: "すぐ", kana: "すぐ", meaning: "Ngay lập tức" },
+      { kanji: "初めて", kana: "はじめて", meaning: "Lần đầu tiên" },
+      // --- BỘ PHẬN CƠ THỂ ---
+      { kanji: "頭", kana: "あたま", meaning: "Đầu" },
+      { kanji: "顔", kana: "かお", meaning: "Khuôn mặt" },
+      { kanji: "目", kana: "め", meaning: "Mắt" },
+      { kanji: "耳", kana: "みみ", meaning: "Tai" },
+      { kanji: "口", kana: "くち", meaning: "Miệng" },
+      { kanji: "鼻", kana: "はな", meaning: "Mũi" },
+      { kanji: "手", kana: "て", meaning: "Tay" },
+      { kanji: "足", kana: "あし", meaning: "Chân" },
+      { kanji: "お腹", kana: "おなか", meaning: "Bụng" },
+      { kanji: "病気", kana: "びょうき", meaning: "Bệnh tật, ốm" },
+      { kanji: "風邪", kana: "かぜ", meaning: "Cảm cúm" },
+      { kanji: "薬", kana: "くすり", meaning: "Thuốc" },
+      // --- GIẢI TRÍ ---
+      { kanji: "音楽", kana: "おんがく", meaning: "Âm nhạc" },
+      { kanji: "映画", kana: "えいが", meaning: "Phim ảnh" },
+      { kanji: "写真", kana: "しゃしん", meaning: "Ảnh, bức ảnh" },
+      { kanji: "スポーツ", kana: "スポーツ", meaning: "Thể thao" },
+      { kanji: "旅行", kana: "りょこう", meaning: "Du lịch" },
+      { kanji: "宿題", kana: "しゅくだい", meaning: "Bài tập về nhà" },
+      { kanji: "試験", kana: "しけん", meaning: "Kỳ thi" },
+      // --- THIÊN NHIÊN ---
+      { kanji: "天気", kana: "てんき", meaning: "Thời tiết" },
+      { kanji: "雨", kana: "あめ", meaning: "Mưa" },
+      { kanji: "雪", kana: "ゆき", meaning: "Tuyết" },
+      { kanji: "花", kana: "はな", meaning: "Hoa" },
+      { kanji: "木", kana: "き", meaning: "Cây" },
+      { kanji: "犬", kana: "いぬ", meaning: "Con chó" },
+      { kanji: "猫", kana: "ねこ", meaning: "Con mèo" },
+      { kanji: "動物", kana: "どうぶつ", meaning: "Động vật" },
+      // --- GIAO TIẾP ---
+      { kanji: "おめでとうございます", kana: "おめでとうございます", meaning: "Chúc mừng" },
+      { kanji: "お大事に", kana: "おだいじに", meaning: "Chúc mau khỏe" },
+      { kanji: "お疲れ様", kana: "おつかれさま", meaning: "Bạn đã vất vả rồi" },
+      { kanji: "失礼します", kana: "しつれいします", meaning: "Xin phép (ra vào)" },
+      { kanji: "すみません", kana: "すみません", meaning: "Xin lỗi / Cho hỏi" },
+      { kanji: "お願いします", kana: "おねがいします", meaning: "Làm ơn / Nhờ bạn" },
+      { kanji: "ただいま", kana: "ただいま", meaning: "Tôi đã về" },
+      { kanji: "行ってきます", kana: "いってきます", meaning: "Tôi đi đây" },
+      // --- THÊM TỪ VỰNG ---
+      { kanji: "外国人", kana: "がいこくじん", meaning: "Người nước ngoài" },
+      { kanji: "留学生", kana: "りゅうがくせい", meaning: "Du học sinh" },
+      { kanji: "地下鉄", kana: "ちかてつ", meaning: "Tàu điện ngầm" },
+      { kanji: "新幹線", kana: "しんかんせん", meaning: "Tàu cao tốc Shinkansen" },
+      { kanji: "映画館", kana: "えいがかん", meaning: "Rạp chiếu phim" },
+      { kanji: "大使館", kana: "たいしかん", meaning: "Đại sứ quán" },
+      { kanji: "神社", kana: "じんじゃ", meaning: "Đền thờ thần đạo" },
+      { kanji: "お寺", kana: "おてら", meaning: "Chùa" },
+      { kanji: "交差点", kana: "こうさてん", meaning: "Ngã tư" },
+      { kanji: "信号", kana: "しんごう", meaning: "Đèn giao thông" },
+      { kanji: "料理", kana: "りょうり", meaning: "Món ăn, nấu ăn" },
+      { kanji: "冷蔵庫", kana: "れいぞうこ", meaning: "Tủ lạnh" },
+      { kanji: "洗濯機", kana: "せんたくき", meaning: "Máy giặt" },
+      { kanji: "エアコン", kana: "エアコン", meaning: "Máy điều hòa" },
+      { kanji: "パソコン", kana: "パソコン", meaning: "Máy tính cá nhân" },
+      { kanji: "安全", kana: "あんぜん", meaning: "An toàn" },
+      { kanji: "危険", kana: "きけん", meaning: "Nguy hiểm" },
+      { kanji: "健康", kana: "けんこう", meaning: "Sức khỏe" },
+      { kanji: "将来", kana: "しょうらい", meaning: "Tương lai" },
+      { kanji: "経験", kana: "けいけん", meaning: "Kinh nghiệm" },
+      { kanji: "理由", kana: "りゆう", meaning: "Lý do" },
+      { kanji: "意味", kana: "いみ", meaning: "Ý nghĩa" },
+      { kanji: "約束", kana: "やくそく", meaning: "Lời hứa, cuộc hẹn" },
+      { kanji: "趣味", kana: "しゅみ", meaning: "Sở thích" },
+      { kanji: "習慣", kana: "しゅうかん", meaning: "Thói quen" },
+      { kanji: "最近", kana: "さいきん", meaning: "Gần đây" },
+      { kanji: "最後", kana: "さいご", meaning: "Cuối cùng" },
+      { kanji: "最初", kana: "さいしょ", meaning: "Đầu tiên" },
+      { kanji: "問題", kana: "もんだい", meaning: "Vấn đề, bài toán" },
+      { kanji: "答え", kana: "こたえ", meaning: "Câu trả lời" },
+      { kanji: "考えます", kana: "かんがえます", meaning: "Suy nghĩ, tư duy" },
+      { kanji: "覚えます", kana: "おぼえます", meaning: "Ghi nhớ" },
+      { kanji: "忘れます", kana: "わすれます", meaning: "Quên" },
+      { kanji: "準備します", kana: "じゅんびします", meaning: "Chuẩn bị" },
+      { kanji: "練習します", kana: "れんしゅうします", meaning: "Luyện tập" },
+      { kanji: "乗り換えます", kana: "のりかえます", meaning: "Chuyển tàu, xe" },
+      { kanji: "掃除します", kana: "そうじします", meaning: "Dọn vệ sinh" },
+      { kanji: "洗濯します", kana: "せんたくします", meaning: "Giặt giũ" },
+      { kanji: "一日", kana: "ついたち", meaning: "Ngày mồng 1" },
+      { kanji: "二日", kana: "ふつか", meaning: "Ngày mồng 2" },
+      { kanji: "三日", kana: "みっか", meaning: "Ngày mồng 3" },
+      { kanji: "四日", kana: "よっか", meaning: "Ngày mồng 4" },
+      { kanji: "五日", kana: "いつか", meaning: "Ngày mồng 5" },
+      { kanji: "六日", kana: "むいか", meaning: "Ngày mồng 6" },
+      { kanji: "七日", kana: "なのか", meaning: "Ngày mồng 7" },
+      { kanji: "八日", kana: "ようか", meaning: "Ngày mồng 8" },
+      { kanji: "九日", kana: "ここのか", meaning: "Ngày mồng 9" },
+      { kanji: "十日", kana: "とおか", meaning: "Ngày mồng 10" },
+      { kanji: "二十日", kana: "はつか", meaning: "Ngày 20" },
+      { kanji: "一つ", kana: "ひとつ", meaning: "1 cái (vật chung)" },
+      { kanji: "二つ", kana: "ふたつ", meaning: "2 cái" },
+      { kanji: "三つ", kana: "みっつ", meaning: "3 cái" },
+      { kanji: "四つ", kana: "よっつ", meaning: "4 cái" },
+      { kanji: "五つ", kana: "いつつ", meaning: "5 cái" },
+      { kanji: "一人", kana: "ひとり", meaning: "1 người" },
+      { kanji: "二人", kana: "ふたり", meaning: "2 người" },
+      { kanji: "正月", kana: "しょうがつ", meaning: "Ngày Tết" },
+      { kanji: "お祭り", kana: "おまつり", meaning: "Lễ hội" },
+      { kanji: "乾杯", kana: "かんぱい", meaning: "Cạn chén / Nâng ly" },
+      { kanji: "赤", kana: "あか", meaning: "Màu đỏ" },
+      { kanji: "青", kana: "あお", meaning: "Màu xanh" },
+      { kanji: "白", kana: "しろ", meaning: "Màu trắng" },
+      { kanji: "黒", kana: "くろ", meaning: "Màu đen" },
+      { kanji: "色", kana: "いろ", meaning: "Màu sắc" },
+      { kanji: "時々", kana: "ときどき", meaning: "Thỉnh thoảng" },
+      { kanji: "全然", kana: "ぜんぜん", meaning: "Hoàn toàn không" },
+      { kanji: "絶対", kana: "ぜったい", meaning: "Tuyệt đối, nhất định" },
+      { kanji: "一生懸命", kana: "いっしょうけんめい", meaning: "Cố gắng hết sức" },
+    ];
 
-  useEffect(() => {
-    if ('speechSynthesis' in window)
-      window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
-  }, []);
+    // =============================================================
+    // INLINE SVG ICONS (thay thế lucide-react)
+    // =============================================================
+    function Svg({ children, size = 20, className = "" }) {
+      return (
+        <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size}
+          viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+          className={className}>{children}</svg>
+      );
+    }
+    const BookOpenIcon = ({ size, className }) => <Svg size={size} className={className}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></Svg>;
+    const GradCapIcon = ({ size, className }) => <Svg size={size} className={className}><path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c3 3 9 3 12 0v-5" /></Svg>;
+    const PlayIcon = ({ size, className }) => <Svg size={size} className={className}><polygon points="5 3 19 12 5 21 5 3" /></Svg>;
+    const TrophyIcon = ({ size, className }) => <Svg size={size} className={className}><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" /><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" /><path d="M4 22h16" /><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" /><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" /><path d="M18 2H6v7a6 6 0 0 0 12 0V2z" /></Svg>;
+    const ArrowRightIcon = ({ size, className }) => <Svg size={size} className={className}><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></Svg>;
+    const AlertIcon = ({ size, className }) => <Svg size={size} className={className}><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" /><path d="M12 9v4" /><path d="M12 17h.01" /></Svg>;
+    const VolumeIcon = ({ size, className }) => <Svg size={size} className={className}><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" /><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" /></Svg>;
+    const SparklesIcon = ({ size, className }) => <Svg size={size} className={className}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /><path d="M5 3v4" /><path d="M19 17v4" /><path d="M3 5h4" /><path d="M17 19h4" /></Svg>;
+    const LoaderIcon = ({ size, className }) => <Svg size={size} className={className}><path d="M21 12a9 9 0 1 1-6.219-8.56" /></Svg>;
+    const CheckCircleIcon = ({ size, className }) => <Svg size={size} className={className}><circle cx="12" cy="12" r="10" /><path d="m9 12 2 2 4-4" /></Svg>;
+    const XCircleIcon = ({ size, className }) => <Svg size={size} className={className}><circle cx="12" cy="12" r="10" /><path d="m15 9-6 6" /><path d="m9 9 6 6" /></Svg>;
+    const RotateCcwIcon = ({ size, className }) => <Svg size={size} className={className}><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></Svg>;
 
-  // ----- Learning -----
-  const startLearning = () => {
-    const batch = newWords.slice(0, BATCH_SIZE);
-    if (batch.length === 0) return;
-    setLearningBatch(batch);
-    setLearningIndex(0);
-    setIsFlipped(false);
-    setAiData(null); setAiError('');
-    setIsReviewSession(false);
-    setCurrentMode('learning');
-  };
+    // =============================================================
+    // APP COMPONENT
+    // =============================================================
+    function App() {
+      // Vocabulary state
+      const [words, setWords] = useState([]);
+      const [wordStatuses, setWordStatuses] = useState({});
+      const [lastBatch, setLastBatch] = useState([]);
+      const [appLoading, setAppLoading] = useState(true);
+      const [sheetError, setSheetError] = useState(false);
 
-  const handleNextLearningWord = () => {
-    if (learningIndex < learningBatch.length - 1) {
-      setIsFlipped(false);
-      setAiData(null); setAiError(''); setAiLoading(false);
-      setTimeout(() => setLearningIndex(p => p + 1), 150);
-    } else {
-      if (!isReviewSession) {
-        learningBatch.forEach(w => updateStatus(w.kanji, 'learned'));
-        const batchKanjis = learningBatch.map(w => w.kanji);
-        setLastBatch(batchKanjis);
-        lsSet('n5_last_batch', batchKanjis);
-      } else {
-        // After reviewing wrong words: mark as learned again (ready for re-test)
-        learningBatch.forEach(w => {
-          if (wordStatuses[w.kanji] === 'review') updateStatus(w.kanji, 'learned');
+      // Navigation
+      const [currentMode, setCurrentMode] = useState('menu');
+
+      // Learning state
+      const [learningBatch, setLearningBatch] = useState([]);
+      const [learningIndex, setLearningIndex] = useState(0);
+      const [isFlipped, setIsFlipped] = useState(false);
+      const [isReviewSession, setIsReviewSession] = useState(false);
+
+      // Quiz state
+      const [quizQuestions, setQuizQuestions] = useState([]);
+      const [currentQuizIndex, setCurrentQuizIndex] = useState(0);
+      const [quizScore, setQuizScore] = useState(0);
+      const [selectedAnswer, setSelectedAnswer] = useState(null);
+
+      // UI state
+      const [showResetConfirm, setShowResetConfirm] = useState(false);
+
+      // AI state
+      const [aiLoading, setAiLoading] = useState(false);
+      const [aiData, setAiData] = useState(null);
+      const [aiError, setAiError] = useState("");
+
+      const BATCH_SIZE = 10;
+
+      // ----- Derived values -----
+      const newWords = words.filter(w => !wordStatuses[w.kanji] || wordStatuses[w.kanji] === 'new');
+      const reviewWords = words.filter(w => wordStatuses[w.kanji] === 'review');
+      const learnedCount = words.filter(w => ['learned', 'review', 'mastered'].includes(wordStatuses[w.kanji])).length;
+      const masteredCount = words.filter(w => wordStatuses[w.kanji] === 'mastered').length;
+      const totalWords = words.length;
+
+      // ----- Initialization -----
+      useEffect(() => {
+        async function init() {
+          const localStatuses = lsGet('n5_statuses', {});
+          const localLastBatch = lsGet('n5_last_batch', []);
+          setLastBatch(localLastBatch);
+
+          const sheetData = await fetchVocabulary();
+          if (sheetData) {
+            const vocab = sheetData.map(({ kanji, kana, meaning }) => ({ kanji, kana, meaning }));
+            const statuses = {};
+            sheetData.forEach(w => { if (w.kanji) statuses[w.kanji] = w.status || 'new'; });
+            setWords(vocab);
+            setWordStatuses(statuses);
+            lsSet('n5_statuses', statuses);
+            lsSet('n5_words_cache', vocab);
+          } else {
+            if (CONFIG.APPS_SCRIPT_URL) setSheetError(true);
+            const cachedWords = lsGet('n5_words_cache', null);
+            setWords(cachedWords || N5_WORDS_FALLBACK);
+            setWordStatuses(localStatuses);
+          }
+
+          setAppLoading(false);
+          const splash = document.getElementById('splash');
+          if (splash) { splash.classList.add('hidden'); setTimeout(() => splash.remove(), 500); }
+        }
+        init();
+      }, []);
+
+      // Sync statuses to localStorage when changed
+      useEffect(() => {
+        if (!appLoading) lsSet('n5_statuses', wordStatuses);
+      }, [wordStatuses, appLoading]);
+
+      // ----- Status update -----
+      const updateStatus = useCallback((kanji, status) => {
+        setWordStatuses(prev => ({ ...prev, [kanji]: status }));
+        pushStatus(kanji, status);
+      }, []);
+
+      // ----- Speech synthesis -----
+      const playPronunciation = (text, fallback, e) => {
+        if (e) e.stopPropagation();
+        if (!('speechSynthesis' in window)) return;
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text || fallback);
+        utterance.lang = 'ja-JP';
+        utterance.rate = 0.85;
+        utterance.pitch = 1.0;
+        const voices = window.speechSynthesis.getVoices();
+        const jaVoice = voices.find(v => v.lang === 'ja-JP' && (v.name.includes('Google') || v.name.includes('Microsoft') || v.name.includes('Kyoko')))
+          || voices.find(v => v.lang.startsWith('ja'));
+        if (jaVoice) utterance.voice = jaVoice;
+        window.speechSynthesis.speak(utterance);
+      };
+
+      useEffect(() => {
+        if ('speechSynthesis' in window)
+          window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+      }, []);
+
+      // ----- Learning -----
+      const startLearning = () => {
+        const batch = newWords.slice(0, BATCH_SIZE);
+        if (batch.length === 0) return;
+        setLearningBatch(batch);
+        setLearningIndex(0);
+        setIsFlipped(false);
+        setAiData(null); setAiError('');
+        setIsReviewSession(false);
+        setCurrentMode('learning');
+      };
+
+      const handleNextLearningWord = () => {
+        if (learningIndex < learningBatch.length - 1) {
+          setIsFlipped(false);
+          setAiData(null); setAiError(''); setAiLoading(false);
+          setTimeout(() => setLearningIndex(p => p + 1), 150);
+        } else {
+          if (!isReviewSession) {
+            learningBatch.forEach(w => updateStatus(w.kanji, 'learned'));
+            const batchKanjis = learningBatch.map(w => w.kanji);
+            setLastBatch(batchKanjis);
+            lsSet('n5_last_batch', batchKanjis);
+          } else {
+            // After reviewing wrong words: mark as learned again (ready for re-test)
+            learningBatch.forEach(w => {
+              if (wordStatuses[w.kanji] === 'review') updateStatus(w.kanji, 'learned');
+            });
+          }
+          setCurrentMode('menu');
+        }
+      };
+
+      // ----- Review -----
+      const startReview = () => {
+        if (reviewWords.length === 0) return;
+        setLearningBatch([...reviewWords]);
+        setLearningIndex(0);
+        setIsFlipped(false);
+        setAiData(null); setAiError('');
+        setIsReviewSession(true);
+        setCurrentMode('learning');
+      };
+
+      // ----- Quiz -----
+      const shuffle = arr => [...arr].sort(() => Math.random() - 0.5);
+
+      const generateQuestionsForWords = (wordsArray, allWords) => {
+        const questions = [];
+        wordsArray.forEach(word => {
+          const others = allWords.filter(w => w.kanji !== word.kanji);
+          const wrongMeanings = shuffle(others).slice(0, 3).map(w => w.meaning);
+          questions.push({ originalWord: word, type: 'meaning', promptLabel: 'Chọn nghĩa của từ sau', promptMain: word.kanji, promptSub: word.kana, correctAnswer: word.meaning, options: shuffle([word.meaning, ...wrongMeanings]) });
+          const wrongKanas = shuffle(others).slice(0, 3).map(w => w.kana);
+          questions.push({ originalWord: word, type: 'reading', promptLabel: 'Chọn cách đọc của từ sau', promptMain: word.kanji, promptSub: word.meaning, correctAnswer: word.kana, options: shuffle([word.kana, ...wrongKanas]) });
+          const wrongKanjis = shuffle(others).slice(0, 3).map(w => w.kanji);
+          questions.push({ originalWord: word, type: 'writing', promptLabel: 'Chọn chữ Hán / Cách viết của từ sau', promptMain: word.meaning, promptSub: '', correctAnswer: word.kanji, options: shuffle([word.kanji, ...wrongKanjis]) });
         });
-      }
-      setCurrentMode('menu');
-    }
-  };
+        return questions;
+      };
 
-  // ----- Review -----
-  const startReview = () => {
-    if (reviewWords.length === 0) return;
-    setLearningBatch([...reviewWords]);
-    setLearningIndex(0);
-    setIsFlipped(false);
-    setAiData(null); setAiError('');
-    setIsReviewSession(true);
-    setCurrentMode('learning');
-  };
+      const openQuizOptions = () => {
+        if (learnedCount === 0) return;
+        if (lastBatch.length === 0 || learnedCount <= BATCH_SIZE) {
+          handleStartQuiz('recent');
+        } else {
+          setCurrentMode('quizSelect');
+        }
+      };
 
-  // ----- Quiz -----
-  const shuffle = arr => [...arr].sort(() => Math.random() - 0.5);
+      const handleStartQuiz = (type) => {
+        const learnedWords = words.filter(w => ['learned', 'review', 'mastered'].includes(wordStatuses[w.kanji]));
+        let questions = [];
+        if (type === 'recent') {
+          let recentWords = lastBatch.length > 0
+            ? words.filter(w => lastBatch.includes(w.kanji))
+            : [];
+          if (recentWords.length === 0) recentWords = learnedWords.slice(0, BATCH_SIZE);
+          if (recentWords.length === 0) return;
+          questions = shuffle(generateQuestionsForWords(recentWords, words));
+        } else {
+          const allQ = generateQuestionsForWords(learnedWords, words);
+          questions = shuffle(allQ).slice(0, 10);
+        }
+        setQuizQuestions(questions);
+        setCurrentQuizIndex(0);
+        setQuizScore(0);
+        setSelectedAnswer(null);
+        setCurrentMode('quiz');
+      };
 
-  const generateQuestionsForWords = (wordsArray, allWords) => {
-    const questions = [];
-    wordsArray.forEach(word => {
-      const others = allWords.filter(w => w.kanji !== word.kanji);
-      const wrongMeanings = shuffle(others).slice(0, 3).map(w => w.meaning);
-      questions.push({ originalWord: word, type: 'meaning', promptLabel: 'Chọn nghĩa của từ sau', promptMain: word.kanji, promptSub: word.kana, correctAnswer: word.meaning, options: shuffle([word.meaning, ...wrongMeanings]) });
-      const wrongKanas = shuffle(others).slice(0, 3).map(w => w.kana);
-      questions.push({ originalWord: word, type: 'reading', promptLabel: 'Chọn cách đọc của từ sau', promptMain: word.kanji, promptSub: word.meaning, correctAnswer: word.kana, options: shuffle([word.kana, ...wrongKanas]) });
-      const wrongKanjis = shuffle(others).slice(0, 3).map(w => w.kanji);
-      questions.push({ originalWord: word, type: 'writing', promptLabel: 'Chọn chữ Hán / Cách viết của từ sau', promptMain: word.meaning, promptSub: '', correctAnswer: word.kanji, options: shuffle([word.kanji, ...wrongKanjis]) });
-    });
-    return questions;
-  };
+      const handleAnswerSelect = (option) => {
+        if (selectedAnswer) return;
+        setSelectedAnswer(option);
+        const q = quizQuestions[currentQuizIndex];
+        if (option === q.correctAnswer) {
+          setQuizScore(p => p + 1);
+          if (wordStatuses[q.originalWord.kanji] === 'review') {
+            updateStatus(q.originalWord.kanji, 'mastered');
+          }
+        } else {
+          updateStatus(q.originalWord.kanji, 'review');
+        }
+      };
 
-  const openQuizOptions = () => {
-    if (learnedCount === 0) return;
-    if (lastBatch.length === 0 || learnedCount <= BATCH_SIZE) {
-      handleStartQuiz('recent');
-    } else {
-      setCurrentMode('quizSelect');
-    }
-  };
+      const handleNextQuestion = () => {
+        if (currentQuizIndex < quizQuestions.length - 1) {
+          setSelectedAnswer(null);
+          setCurrentQuizIndex(p => p + 1);
+        } else {
+          setCurrentMode('result');
+        }
+      };
 
-  const handleStartQuiz = (type) => {
-    const learnedWords = words.filter(w => ['learned','review','mastered'].includes(wordStatuses[w.kanji]));
-    let questions = [];
-    if (type === 'recent') {
-      let recentWords = lastBatch.length > 0
-        ? words.filter(w => lastBatch.includes(w.kanji))
-        : [];
-      if (recentWords.length === 0) recentWords = learnedWords.slice(0, BATCH_SIZE);
-      if (recentWords.length === 0) return;
-      questions = shuffle(generateQuestionsForWords(recentWords, words));
-    } else {
-      const allQ = generateQuestionsForWords(learnedWords, words);
-      questions = shuffle(allQ).slice(0, 10);
-    }
-    setQuizQuestions(questions);
-    setCurrentQuizIndex(0);
-    setQuizScore(0);
-    setSelectedAnswer(null);
-    setCurrentMode('quiz');
-  };
+      // ----- Reset -----
+      const handleReset = () => {
+        setWordStatuses({});
+        setLastBatch([]);
+        setShowResetConfirm(false);
+        lsClear();
+      };
 
-  const handleAnswerSelect = (option) => {
-    if (selectedAnswer) return;
-    setSelectedAnswer(option);
-    const q = quizQuestions[currentQuizIndex];
-    if (option === q.correctAnswer) {
-      setQuizScore(p => p + 1);
-      if (wordStatuses[q.originalWord.kanji] === 'review') {
-        updateStatus(q.originalWord.kanji, 'mastered');
-      }
-    } else {
-      updateStatus(q.originalWord.kanji, 'review');
-    }
-  };
-
-  const handleNextQuestion = () => {
-    if (currentQuizIndex < quizQuestions.length - 1) {
-      setSelectedAnswer(null);
-      setCurrentQuizIndex(p => p + 1);
-    } else {
-      setCurrentMode('result');
-    }
-  };
-
-  // ----- Reset -----
-  const handleReset = () => {
-    setWordStatuses({});
-    setLastBatch([]);
-    setShowResetConfirm(false);
-    lsClear();
-  };
-
-  // ----- AI (Gemini) -----
-  const fetchAiHelp = async (word) => {
-    if (!CONFIG.GEMINI_API_KEY) { setAiError("Chưa cấu hình Gemini API key trong CONFIG."); return; }
-    setAiLoading(true); setAiError(''); setAiData(null);
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${CONFIG.GEMINI_API_KEY}`;
-    const prompt = `Bạn là giáo viên tiếng Nhật N5. Từ vựng: "${word.kanji}" (${word.kana}) - nghĩa tiếng Việt: "${word.meaning}".
+      // ----- AI (Gemini) -----
+      const fetchAiHelp = async (word) => {
+        if (!CONFIG.GEMINI_API_KEY) { setAiError("Chưa cấu hình Gemini API key trong CONFIG."); return; }
+        setAiLoading(true); setAiError(''); setAiData(null);
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${CONFIG.GEMINI_API_KEY}`;
+        const prompt = `Bạn là giáo viên tiếng Nhật N5. Từ vựng: "${word.kanji}" (${word.kana}) - nghĩa tiếng Việt: "${word.meaning}".
 
 YÊU CẦU:
 1. Viết 2 câu ví dụ HOÀN TOÀN bằng tiếng Nhật (N5), có phiên âm Romaji và dịch tiếng Việt.
 2. Đưa ra 1 mẹo nhớ từ bằng tiếng Việt.`;
-    const payload = {
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: "OBJECT",
-          properties: {
-            examples: { type: "ARRAY", items: { type: "OBJECT", properties: { japanese: { type: "STRING" }, romaji: { type: "STRING" }, vietnamese: { type: "STRING" } } } },
-            tip: { type: "STRING" }
+        const payload = {
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            responseMimeType: "application/json",
+            responseSchema: {
+              type: "OBJECT",
+              properties: {
+                examples: { type: "ARRAY", items: { type: "OBJECT", properties: { japanese: { type: "STRING" }, romaji: { type: "STRING" }, vietnamese: { type: "STRING" } } } },
+                tip: { type: "STRING" }
+              }
+            }
           }
+        };
+        try {
+          const res = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const data = await res.json();
+          const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (text) setAiData(JSON.parse(text)); else throw new Error('Empty response');
+        } catch (err) {
+          setAiError('Lỗi gọi AI. Kiểm tra API key hoặc thử lại sau.');
+        } finally {
+          setAiLoading(false);
         }
-      }
-    };
-    try {
-      const res = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const data = await res.json();
-      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (text) setAiData(JSON.parse(text)); else throw new Error('Empty response');
-    } catch (err) {
-      setAiError('Lỗi gọi AI. Kiểm tra API key hoặc thử lại sau.');
-    } finally {
-      setAiLoading(false);
-    }
-  };
+      };
 
-  // =============================================================
-  // RENDER: Loading
-  // =============================================================
-  if (appLoading) return null;
+      // =============================================================
+      // RENDER: Loading
+      // =============================================================
+      if (appLoading) return null;
 
-  // =============================================================
-  // RENDER: Menu
-  // =============================================================
-  const renderMenu = () => (
-    <div className="flex flex-col items-center justify-center p-8 bg-white rounded-2xl shadow-xl max-w-md w-full">
-      <div className="w-20 h-20 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-6">
-        <GradCapIcon size={40} />
-      </div>
-      <h1 className="text-2xl font-bold text-gray-800 mb-1">Gungun N5 Flashcards</h1>
-      {sheetError && (
-        <p className="text-xs text-orange-500 mb-2 text-center">⚠ Không kết nối được Google Sheets, dùng dữ liệu offline.</p>
-      )}
-      <p className="text-gray-500 text-center mb-6 text-sm">Học từ vựng theo cụm 10 từ và làm bài trắc nghiệm tích lũy!</p>
-
-      {/* Progress bar */}
-      <div className="w-full bg-gray-100 rounded-full h-3 mb-2 overflow-hidden">
-        <div className="bg-blue-600 h-3 rounded-full transition-all duration-700"
-             style={{ width: `${totalWords ? (learnedCount / totalWords) * 100 : 0}%` }}></div>
-      </div>
-      <p className="text-sm text-gray-600 font-medium mb-2">
-        Đã học: <span className="text-blue-600 font-bold text-base">{learnedCount}</span> / {totalWords} từ
-      </p>
-
-      {/* Status badges */}
-      {learnedCount > 0 && (
-        <div className="flex gap-3 mb-6 text-xs">
-          <span className="px-2 py-1 bg-blue-50 text-blue-600 rounded-full font-medium">📘 {learnedCount} đã học</span>
-          {reviewWords.length > 0 && <span className="px-2 py-1 bg-orange-50 text-orange-600 rounded-full font-medium">⚠ {reviewWords.length} cần ôn</span>}
-          {masteredCount > 0 && <span className="px-2 py-1 bg-green-50 text-green-600 rounded-full font-medium">✓ {masteredCount} thuộc lòng</span>}
-        </div>
-      )}
-
-      <div className="space-y-3 w-full">
-        <button onClick={startLearning} disabled={newWords.length === 0}
-          className={`w-full flex items-center justify-center gap-2 py-4 px-6 rounded-xl font-bold text-white transition-all transform active:scale-95 ${
-            newWords.length === 0 ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg'}`}>
-          <BookOpenIcon size={20} />
-          {newWords.length === 0 ? 'Đã học hết từ vựng!' : `Học ${Math.min(BATCH_SIZE, newWords.length)} từ tiếp theo`}
-        </button>
-
-        <button onClick={openQuizOptions} disabled={learnedCount === 0}
-          className={`w-full flex items-center justify-center gap-2 py-4 px-6 rounded-xl font-bold transition-all transform active:scale-95 ${
-            learnedCount === 0 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200 shadow-sm'}`}>
-          <PlayIcon size={20} />
-          Kiểm tra ({learnedCount} từ)
-        </button>
-
-        {reviewWords.length > 0 && (
-          <button onClick={startReview}
-            className="w-full flex items-center justify-center gap-2 py-4 px-6 rounded-xl font-bold text-orange-700 bg-orange-100 hover:bg-orange-200 transition-all shadow-sm transform active:scale-95 animate-fade-in">
-            <AlertIcon size={20} />
-            Ôn lại từ sai ({reviewWords.length} từ)
-          </button>
-        )}
-      </div>
-
-      {learnedCount > 0 && (
-        <div className="mt-8 text-center">
-          {!showResetConfirm ? (
-            <button onClick={() => setShowResetConfirm(true)}
-              className="text-xs text-gray-400 hover:text-red-500 transition-colors underline">
-              Xóa tiến trình học
-            </button>
-          ) : (
-            <div className="bg-red-50 p-4 rounded-xl border border-red-100 animate-fade-in">
-              <p className="text-sm text-red-600 font-medium mb-3">Bạn có chắc chắn muốn xóa toàn bộ tiến trình không?</p>
-              <div className="flex gap-2 justify-center">
-                <button onClick={handleReset} className="px-4 py-2 bg-red-500 text-white text-sm font-bold rounded-lg hover:bg-red-600">Đồng ý</button>
-                <button onClick={() => setShowResetConfirm(false)} className="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-bold rounded-lg hover:bg-gray-300">Hủy</button>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-
-  // =============================================================
-  // RENDER: Quiz Select
-  // =============================================================
-  const renderQuizSelect = () => (
-    <div className="flex flex-col items-center justify-center p-8 bg-white rounded-3xl shadow-xl max-w-md w-full text-center">
-      <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-6">
-        <PlayIcon size={40} />
-      </div>
-      <h2 className="text-2xl font-bold text-gray-800 mb-2">Chọn chế độ kiểm tra</h2>
-      <p className="text-gray-500 mb-8 text-sm">Bạn muốn ôn tập theo phương pháp nào?</p>
-      <div className="space-y-4 w-full">
-        <button onClick={() => handleStartQuiz('recent')}
-          className="w-full flex flex-col items-start p-4 rounded-xl border-2 border-blue-500 bg-blue-50 text-blue-700 hover:bg-blue-100 transition-all">
-          <span className="font-bold text-lg mb-1">Kiểm tra bài mới</span>
-          <span className="text-sm opacity-80">30 câu hỏi cho {Math.min(BATCH_SIZE, lastBatch.length)} từ vừa học xong</span>
-        </button>
-        <button onClick={() => handleStartQuiz('random')}
-          className="w-full flex flex-col items-start p-4 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-all">
-          <span className="font-bold text-lg mb-1">Kiểm tra tổng hợp</span>
-          <span className="text-sm opacity-80">10 câu hỏi ngẫu nhiên trong {learnedCount} từ đã học</span>
-        </button>
-      </div>
-      <button onClick={() => setCurrentMode('menu')} className="mt-6 text-gray-500 hover:text-gray-800 font-medium text-sm">
-        ← Quay lại
-      </button>
-    </div>
-  );
-
-  // =============================================================
-  // RENDER: Learning
-  // =============================================================
-  const renderLearning = () => {
-    const currentWord = learningBatch[learningIndex];
-    if (!currentWord) return null;
-    return (
-      <div className="flex flex-col items-center justify-center w-full max-w-md pb-12">
-        <div className="w-full flex justify-between items-center mb-6 px-1">
-          <button onClick={() => setCurrentMode('menu')} className="text-gray-500 hover:text-gray-800 font-medium text-sm">
-            ← Thoát
-          </button>
-          <div className="text-gray-500 font-medium text-sm flex items-center gap-2">
-            {isReviewSession && <AlertIcon size={14} className="text-orange-500" />}
-            Từ {learningIndex + 1} / {learningBatch.length}
+      // =============================================================
+      // RENDER: Menu
+      // =============================================================
+      const renderMenu = () => (
+        <div className="flex flex-col items-center justify-center p-8 bg-white rounded-2xl shadow-xl max-w-md w-full">
+          <div className="w-20 h-20 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-6">
+            <GradCapIcon size={40} />
           </div>
-        </div>
+          <h1 className="text-2xl font-bold text-gray-800 mb-1">Gungun N5 Flashcards</h1>
+          {sheetError && (
+            <p className="text-xs text-orange-500 mb-2 text-center">⚠ Không kết nối được Google Sheets, dùng dữ liệu offline.</p>
+          )}
+          <p className="text-gray-500 text-center mb-6 text-sm">Học từ vựng theo cụm 10 từ và làm bài trắc nghiệm tích lũy!</p>
 
-        {/* Flashcard with 3D flip */}
-        <div className="perspective-1000 w-full h-72 cursor-pointer relative select-none"
-             onClick={() => setIsFlipped(f => !f)}>
-          <div className={`relative w-full h-full transition-transform duration-500 transform-style-3d ${isFlipped ? 'rotate-y-180' : ''}`}>
-            {/* Front: Japanese */}
-            <div className="absolute w-full h-full bg-white rounded-3xl shadow-xl flex flex-col items-center justify-center p-8 backface-hidden border border-gray-100" lang="ja">
-              <button onClick={(e) => playPronunciation(currentWord.kanji, currentWord.kana, e)}
-                className="absolute top-4 right-4 p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
-                title="Nghe phát âm">
-                <VolumeIcon size={22} />
-              </button>
-              <span className="text-gray-400 text-xs tracking-widest uppercase mb-4 font-semibold">Chạm để lật</span>
-              <h2 className="text-6xl font-bold text-gray-800 mb-4">{currentWord.kanji}</h2>
-              <p className="text-xl text-blue-600 font-medium bg-blue-50 py-2 px-5 rounded-full">{currentWord.kana}</p>
-            </div>
-            {/* Back: Vietnamese */}
-            <div className="absolute w-full h-full bg-blue-600 text-white rounded-3xl shadow-xl flex flex-col items-center justify-center p-8 backface-hidden rotate-y-180">
-              <span className="text-blue-200 text-xs tracking-widest uppercase mb-4 font-semibold">Ý nghĩa</span>
-              <h2 className="text-4xl font-bold text-center leading-tight">{currentWord.meaning}</h2>
-            </div>
+          {/* Progress bar */}
+          <div className="w-full bg-gray-100 rounded-full h-3 mb-2 overflow-hidden">
+            <div className="bg-blue-600 h-3 rounded-full transition-all duration-700"
+              style={{ width: `${totalWords ? (learnedCount / totalWords) * 100 : 0}%` }}></div>
           </div>
-        </div>
+          <p className="text-sm text-gray-600 font-medium mb-2">
+            Đã học: <span className="text-blue-600 font-bold text-base">{learnedCount}</span> / {totalWords} từ
+          </p>
 
-        {/* AI Assistant */}
-        <div className="w-full mt-5">
-          {!aiData && !aiLoading && (
-            <button onClick={() => fetchAiHelp(currentWord)}
-              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition-colors border border-indigo-200">
-              <SparklesIcon size={16} className="text-indigo-500" />
-              Giải thích &amp; Lấy ví dụ với AI ✨
+          {/* Status badges */}
+          {learnedCount > 0 && (
+            <div className="flex gap-3 mb-6 text-xs">
+              <span className="px-2 py-1 bg-blue-50 text-blue-600 rounded-full font-medium">📘 {learnedCount} đã học</span>
+              {reviewWords.length > 0 && <span className="px-2 py-1 bg-orange-50 text-orange-600 rounded-full font-medium">⚠ {reviewWords.length} cần ôn</span>}
+              {masteredCount > 0 && <span className="px-2 py-1 bg-green-50 text-green-600 rounded-full font-medium">✓ {masteredCount} thuộc lòng</span>}
+            </div>
+          )}
+
+          <div className="space-y-3 w-full">
+            <button onClick={startLearning} disabled={newWords.length === 0}
+              className={`w-full flex items-center justify-center gap-2 py-4 px-6 rounded-xl font-bold text-white transition-all transform active:scale-95 ${newWords.length === 0 ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg'}`}>
+              <BookOpenIcon size={20} />
+              {newWords.length === 0 ? 'Đã học hết từ vựng!' : `Học ${Math.min(BATCH_SIZE, newWords.length)} từ tiếp theo`}
             </button>
-          )}
-          {aiLoading && (
-            <div className="w-full flex items-center justify-center gap-2 py-3 px-4 text-indigo-500 bg-indigo-50 rounded-xl">
-              <LoaderIcon size={16} className="animate-spin" />
-              AI đang suy nghĩ...
-            </div>
-          )}
-          {aiError && <p className="text-center text-red-500 text-sm mt-2">{aiError}</p>}
-          {aiData && (
-            <div className="w-full bg-white p-5 rounded-2xl shadow-sm border border-indigo-100 mt-2 text-left animate-fade-in">
-              <h3 className="flex items-center gap-2 font-bold text-indigo-700 mb-3 border-b border-indigo-50 pb-2 text-sm">
-                <SparklesIcon size={14} /> Mẹo nhớ từ AI
-              </h3>
-              <p className="text-gray-700 text-sm leading-relaxed mb-4">{aiData.tip}</p>
-              <h3 className="font-bold text-gray-800 mb-2 text-sm">Câu ví dụ:</h3>
-              <ul className="space-y-3">
-                {(aiData.examples || []).map((ex, idx) => (
-                  <li key={idx} className="bg-gray-50 p-3 rounded-xl border border-gray-100" lang="ja">
-                    <p className="font-medium text-gray-800 flex items-center gap-2 text-sm">
-                      {ex.japanese}
-                      <button onClick={() => playPronunciation(ex.japanese, '', null)}
-                        className="text-gray-400 hover:text-indigo-600 focus:outline-none flex-shrink-0">
-                        <VolumeIcon size={13} />
-                      </button>
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">{ex.romaji}</p>
-                    <p className="text-sm text-indigo-600 mt-1">{ex.vietnamese}</p>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
 
-        <button onClick={handleNextLearningWord}
-          className="mt-5 bg-gray-800 text-white w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-gray-900 transition-colors shadow-lg active:scale-95 transform">
-          {learningIndex < learningBatch.length - 1 ? 'Từ tiếp theo' : (isReviewSession ? 'Hoàn thành ôn tập' : 'Hoàn thành phiên học')}
-          <ArrowRightIcon size={20} />
-        </button>
-      </div>
-    );
-  };
+            <button onClick={openQuizOptions} disabled={learnedCount === 0}
+              className={`w-full flex items-center justify-center gap-2 py-4 px-6 rounded-xl font-bold transition-all transform active:scale-95 ${learnedCount === 0 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200 shadow-sm'}`}>
+              <PlayIcon size={20} />
+              Kiểm tra ({learnedCount} từ)
+            </button>
 
-  // =============================================================
-  // RENDER: Quiz
-  // =============================================================
-  const renderQuiz = () => {
-    const question = quizQuestions[currentQuizIndex];
-    if (!question) return null;
-    return (
-      <div className="flex flex-col w-full max-w-md bg-white rounded-3xl shadow-xl overflow-hidden">
-        <div className="bg-emerald-500 p-6 text-white text-center relative">
-          <button onClick={() => setCurrentMode('menu')} className="absolute left-4 top-6 text-emerald-100 hover:text-white font-medium text-sm">
-            Thoát
-          </button>
-          <span className="text-emerald-100 font-medium text-sm">Câu hỏi {currentQuizIndex + 1} / {quizQuestions.length}</span>
-          <div className="mt-3 text-emerald-200 text-xs font-semibold uppercase tracking-wider">{question.promptLabel}</div>
-          <h2 className="text-5xl font-bold mt-2 flex items-center justify-center gap-2" lang="ja">
-            {question.promptMain}
-            {(question.type === 'meaning' || question.type === 'reading') && (
-              <button onClick={(e) => playPronunciation(question.originalWord.kanji, question.originalWord.kana, e)}
-                className="text-emerald-200 hover:text-white transition-colors">
-                <VolumeIcon size={22} />
+            {reviewWords.length > 0 && (
+              <button onClick={startReview}
+                className="w-full flex items-center justify-center gap-2 py-4 px-6 rounded-xl font-bold text-orange-700 bg-orange-100 hover:bg-orange-200 transition-all shadow-sm transform active:scale-95 animate-fade-in">
+                <AlertIcon size={20} />
+                Ôn lại từ sai ({reviewWords.length} từ)
               </button>
             )}
-          </h2>
-          {question.promptSub && <p className="text-lg mt-2 opacity-90">{question.promptSub}</p>}
-        </div>
+          </div>
 
-        <div className="p-6 space-y-3">
-          {question.options.map((option, idx) => {
-            const isSelected = selectedAnswer === option;
-            const isCorrect = option === question.correctAnswer;
-            let cls = "w-full text-left p-4 rounded-xl border-2 font-medium transition-all flex justify-between items-center ";
-            if (!selectedAnswer) {
-              cls += "border-gray-200 hover:border-emerald-500 hover:bg-emerald-50 text-gray-700";
-            } else if (isCorrect) {
-              cls += "border-emerald-500 bg-emerald-50 text-emerald-700";
-            } else if (isSelected && !isCorrect) {
-              cls += "border-red-500 bg-red-50 text-red-700";
-            } else {
-              cls += "border-gray-100 opacity-40 text-gray-400";
-            }
-            return (
-              <button key={idx} onClick={() => handleAnswerSelect(option)} disabled={!!selectedAnswer} className={cls}>
-                <span className="text-base" lang="ja">{option}</span>
-                {selectedAnswer && isCorrect && <CheckCircleIcon size={20} className="text-emerald-500 flex-shrink-0" />}
-                {selectedAnswer && isSelected && !isCorrect && <XCircleIcon size={20} className="text-red-500 flex-shrink-0" />}
-              </button>
-            );
-          })}
-
-          {selectedAnswer && (
-            <button onClick={handleNextQuestion}
-              className="w-full mt-4 bg-emerald-500 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-emerald-600 transition-colors shadow-md animate-fade-in">
-              Tiếp tục <ArrowRightIcon size={20} />
-            </button>
+          {learnedCount > 0 && (
+            <div className="mt-8 text-center">
+              {!showResetConfirm ? (
+                <button onClick={() => setShowResetConfirm(true)}
+                  className="text-xs text-gray-400 hover:text-red-500 transition-colors underline">
+                  Xóa tiến trình học
+                </button>
+              ) : (
+                <div className="bg-red-50 p-4 rounded-xl border border-red-100 animate-fade-in">
+                  <p className="text-sm text-red-600 font-medium mb-3">Bạn có chắc chắn muốn xóa toàn bộ tiến trình không?</p>
+                  <div className="flex gap-2 justify-center">
+                    <button onClick={handleReset} className="px-4 py-2 bg-red-500 text-white text-sm font-bold rounded-lg hover:bg-red-600">Đồng ý</button>
+                    <button onClick={() => setShowResetConfirm(false)} className="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-bold rounded-lg hover:bg-gray-300">Hủy</button>
+                  </div>
+                </div>
+              )}
+            </div>
           )}
         </div>
-      </div>
-    );
-  };
+      );
 
-  // =============================================================
-  // RENDER: Result
-  // =============================================================
-  const renderResult = () => {
-    const total = quizQuestions.length;
-    const pct = total ? Math.round((quizScore / total) * 100) : 0;
-    const msg = pct >= 90 ? '🏆 Xuất sắc!' : pct >= 70 ? '👍 Tốt lắm!' : pct >= 50 ? '💪 Cố gắng thêm!' : '📚 Cần ôn thêm!';
-    return (
-      <div className="flex flex-col items-center justify-center p-8 bg-white rounded-3xl shadow-xl max-w-md w-full text-center">
-        <div className="w-24 h-24 bg-yellow-100 text-yellow-500 rounded-full flex items-center justify-center mb-6">
-          <TrophyIcon size={48} />
+      // =============================================================
+      // RENDER: Quiz Select
+      // =============================================================
+      const renderQuizSelect = () => (
+        <div className="flex flex-col items-center justify-center p-8 bg-white rounded-3xl shadow-xl max-w-md w-full text-center">
+          <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-6">
+            <PlayIcon size={40} />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">Chọn chế độ kiểm tra</h2>
+          <p className="text-gray-500 mb-8 text-sm">Bạn muốn ôn tập theo phương pháp nào?</p>
+          <div className="space-y-4 w-full">
+            <button onClick={() => handleStartQuiz('recent')}
+              className="w-full flex flex-col items-start p-4 rounded-xl border-2 border-blue-500 bg-blue-50 text-blue-700 hover:bg-blue-100 transition-all">
+              <span className="font-bold text-lg mb-1">Kiểm tra bài mới</span>
+              <span className="text-sm opacity-80">30 câu hỏi cho {Math.min(BATCH_SIZE, lastBatch.length)} từ vừa học xong</span>
+            </button>
+            <button onClick={() => handleStartQuiz('random')}
+              className="w-full flex flex-col items-start p-4 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-all">
+              <span className="font-bold text-lg mb-1">Kiểm tra tổng hợp</span>
+              <span className="text-sm opacity-80">10 câu hỏi ngẫu nhiên trong {learnedCount} từ đã học</span>
+            </button>
+          </div>
+          <button onClick={() => setCurrentMode('menu')} className="mt-6 text-gray-500 hover:text-gray-800 font-medium text-sm">
+            ← Quay lại
+          </button>
         </div>
-        <h2 className="text-3xl font-bold text-gray-800 mb-1">Kết quả</h2>
-        <p className="text-gray-500 mb-6 text-sm">{total} câu hỏi — {msg}</p>
-        <div className="text-6xl font-black text-emerald-500 mb-2">
-          {quizScore}<span className="text-3xl text-gray-300">/{total}</span>
+      );
+
+      // =============================================================
+      // RENDER: Learning
+      // =============================================================
+      const renderLearning = () => {
+        const currentWord = learningBatch[learningIndex];
+        if (!currentWord) return null;
+        return (
+          <div className="flex flex-col items-center justify-center w-full max-w-md pb-12">
+            <div className="w-full flex justify-between items-center mb-6 px-1">
+              <button onClick={() => setCurrentMode('menu')} className="text-gray-500 hover:text-gray-800 font-medium text-sm">
+                ← Thoát
+              </button>
+              <div className="text-gray-500 font-medium text-sm flex items-center gap-2">
+                {isReviewSession && <AlertIcon size={14} className="text-orange-500" />}
+                Từ {learningIndex + 1} / {learningBatch.length}
+              </div>
+            </div>
+
+            {/* Flashcard with 3D flip */}
+            <div className="perspective-1000 w-full h-72 cursor-pointer relative select-none"
+              onClick={() => setIsFlipped(f => !f)}>
+              <div className={`relative w-full h-full transition-transform duration-500 transform-style-3d ${isFlipped ? 'rotate-y-180' : ''}`}>
+                {/* Front: Japanese */}
+                <div className="absolute w-full h-full bg-white rounded-3xl shadow-xl flex flex-col items-center justify-center p-8 backface-hidden border border-gray-100" lang="ja">
+                  <button onClick={(e) => playPronunciation(currentWord.kanji, currentWord.kana, e)}
+                    className="absolute top-4 right-4 p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
+                    title="Nghe phát âm">
+                    <VolumeIcon size={22} />
+                  </button>
+                  <span className="text-gray-400 text-xs tracking-widest uppercase mb-4 font-semibold">Chạm để lật</span>
+                  <h2 className="text-6xl font-bold text-gray-800 mb-4">{currentWord.kanji}</h2>
+                  <p className="text-xl text-blue-600 font-medium bg-blue-50 py-2 px-5 rounded-full">{currentWord.kana}</p>
+                </div>
+                {/* Back: Vietnamese */}
+                <div className="absolute w-full h-full bg-blue-600 text-white rounded-3xl shadow-xl flex flex-col items-center justify-center p-8 backface-hidden rotate-y-180">
+                  <span className="text-blue-200 text-xs tracking-widest uppercase mb-4 font-semibold">Ý nghĩa</span>
+                  <h2 className="text-4xl font-bold text-center leading-tight">{currentWord.meaning}</h2>
+                </div>
+              </div>
+            </div>
+
+            {/* AI Assistant */}
+            <div className="w-full mt-5">
+              {!aiData && !aiLoading && (
+                <button onClick={() => fetchAiHelp(currentWord)}
+                  className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition-colors border border-indigo-200">
+                  <SparklesIcon size={16} className="text-indigo-500" />
+                  Giải thích &amp; Lấy ví dụ với AI ✨
+                </button>
+              )}
+              {aiLoading && (
+                <div className="w-full flex items-center justify-center gap-2 py-3 px-4 text-indigo-500 bg-indigo-50 rounded-xl">
+                  <LoaderIcon size={16} className="animate-spin" />
+                  AI đang suy nghĩ...
+                </div>
+              )}
+              {aiError && <p className="text-center text-red-500 text-sm mt-2">{aiError}</p>}
+              {aiData && (
+                <div className="w-full bg-white p-5 rounded-2xl shadow-sm border border-indigo-100 mt-2 text-left animate-fade-in">
+                  <h3 className="flex items-center gap-2 font-bold text-indigo-700 mb-3 border-b border-indigo-50 pb-2 text-sm">
+                    <SparklesIcon size={14} /> Mẹo nhớ từ AI
+                  </h3>
+                  <p className="text-gray-700 text-sm leading-relaxed mb-4">{aiData.tip}</p>
+                  <h3 className="font-bold text-gray-800 mb-2 text-sm">Câu ví dụ:</h3>
+                  <ul className="space-y-3">
+                    {(aiData.examples || []).map((ex, idx) => (
+                      <li key={idx} className="bg-gray-50 p-3 rounded-xl border border-gray-100" lang="ja">
+                        <p className="font-medium text-gray-800 flex items-center gap-2 text-sm">
+                          {ex.japanese}
+                          <button onClick={() => playPronunciation(ex.japanese, '', null)}
+                            className="text-gray-400 hover:text-indigo-600 focus:outline-none flex-shrink-0">
+                            <VolumeIcon size={13} />
+                          </button>
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">{ex.romaji}</p>
+                        <p className="text-sm text-indigo-600 mt-1">{ex.vietnamese}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            <button onClick={handleNextLearningWord}
+              className="mt-5 bg-gray-800 text-white w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-gray-900 transition-colors shadow-lg active:scale-95 transform">
+              {learningIndex < learningBatch.length - 1 ? 'Từ tiếp theo' : (isReviewSession ? 'Hoàn thành ôn tập' : 'Hoàn thành phiên học')}
+              <ArrowRightIcon size={20} />
+            </button>
+          </div>
+        );
+      };
+
+      // =============================================================
+      // RENDER: Quiz
+      // =============================================================
+      const renderQuiz = () => {
+        const question = quizQuestions[currentQuizIndex];
+        if (!question) return null;
+        return (
+          <div className="flex flex-col w-full max-w-md bg-white rounded-3xl shadow-xl overflow-hidden">
+            <div className="bg-emerald-500 p-6 text-white text-center relative">
+              <button onClick={() => setCurrentMode('menu')} className="absolute left-4 top-6 text-emerald-100 hover:text-white font-medium text-sm">
+                Thoát
+              </button>
+              <span className="text-emerald-100 font-medium text-sm">Câu hỏi {currentQuizIndex + 1} / {quizQuestions.length}</span>
+              <div className="mt-3 text-emerald-200 text-xs font-semibold uppercase tracking-wider">{question.promptLabel}</div>
+              <h2 className="text-5xl font-bold mt-2 flex items-center justify-center gap-2" lang="ja">
+                {question.promptMain}
+                {(question.type === 'meaning' || question.type === 'reading') && (
+                  <button onClick={(e) => playPronunciation(question.originalWord.kanji, question.originalWord.kana, e)}
+                    className="text-emerald-200 hover:text-white transition-colors">
+                    <VolumeIcon size={22} />
+                  </button>
+                )}
+              </h2>
+              {question.promptSub && <p className="text-lg mt-2 opacity-90">{question.promptSub}</p>}
+            </div>
+
+            <div className="p-6 space-y-3">
+              {question.options.map((option, idx) => {
+                const isSelected = selectedAnswer === option;
+                const isCorrect = option === question.correctAnswer;
+                let cls = "w-full text-left p-4 rounded-xl border-2 font-medium transition-all flex justify-between items-center ";
+                if (!selectedAnswer) {
+                  cls += "border-gray-200 hover:border-emerald-500 hover:bg-emerald-50 text-gray-700";
+                } else if (isCorrect) {
+                  cls += "border-emerald-500 bg-emerald-50 text-emerald-700";
+                } else if (isSelected && !isCorrect) {
+                  cls += "border-red-500 bg-red-50 text-red-700";
+                } else {
+                  cls += "border-gray-100 opacity-40 text-gray-400";
+                }
+                return (
+                  <button key={idx} onClick={() => handleAnswerSelect(option)} disabled={!!selectedAnswer} className={cls}>
+                    <span className="text-base" lang="ja">{option}</span>
+                    {selectedAnswer && isCorrect && <CheckCircleIcon size={20} className="text-emerald-500 flex-shrink-0" />}
+                    {selectedAnswer && isSelected && !isCorrect && <XCircleIcon size={20} className="text-red-500 flex-shrink-0" />}
+                  </button>
+                );
+              })}
+
+              {selectedAnswer && (
+                <button onClick={handleNextQuestion}
+                  className="w-full mt-4 bg-emerald-500 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-emerald-600 transition-colors shadow-md animate-fade-in">
+                  Tiếp tục <ArrowRightIcon size={20} />
+                </button>
+              )}
+            </div>
+          </div>
+        );
+      };
+
+      // =============================================================
+      // RENDER: Result
+      // =============================================================
+      const renderResult = () => {
+        const total = quizQuestions.length;
+        const pct = total ? Math.round((quizScore / total) * 100) : 0;
+        const msg = pct >= 90 ? '🏆 Xuất sắc!' : pct >= 70 ? '👍 Tốt lắm!' : pct >= 50 ? '💪 Cố gắng thêm!' : '📚 Cần ôn thêm!';
+        return (
+          <div className="flex flex-col items-center justify-center p-8 bg-white rounded-3xl shadow-xl max-w-md w-full text-center">
+            <div className="w-24 h-24 bg-yellow-100 text-yellow-500 rounded-full flex items-center justify-center mb-6">
+              <TrophyIcon size={48} />
+            </div>
+            <h2 className="text-3xl font-bold text-gray-800 mb-1">Kết quả</h2>
+            <p className="text-gray-500 mb-6 text-sm">{total} câu hỏi — {msg}</p>
+            <div className="text-6xl font-black text-emerald-500 mb-2">
+              {quizScore}<span className="text-3xl text-gray-300">/{total}</span>
+            </div>
+            <p className="text-gray-400 text-sm mb-8">{pct}% chính xác</p>
+            <button onClick={() => setCurrentMode('menu')}
+              className="w-full flex items-center justify-center gap-2 bg-gray-800 text-white py-4 rounded-xl font-bold hover:bg-gray-900 transition-colors shadow-md">
+              <RotateCcwIcon size={20} />
+              Về trang chủ
+            </button>
+          </div>
+        );
+      };
+
+      // =============================================================
+      // MAIN RENDER
+      // =============================================================
+      return (
+        <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+          {currentMode === 'menu' && renderMenu()}
+          {currentMode === 'quizSelect' && renderQuizSelect()}
+          {currentMode === 'learning' && renderLearning()}
+          {currentMode === 'quiz' && renderQuiz()}
+          {currentMode === 'result' && renderResult()}
         </div>
-        <p className="text-gray-400 text-sm mb-8">{pct}% chính xác</p>
-        <button onClick={() => setCurrentMode('menu')}
-          className="w-full flex items-center justify-center gap-2 bg-gray-800 text-white py-4 rounded-xl font-bold hover:bg-gray-900 transition-colors shadow-md">
-          <RotateCcwIcon size={20} />
-          Về trang chủ
-        </button>
-      </div>
-    );
-  };
+      );
+    }
 
-  // =============================================================
-  // MAIN RENDER
-  // =============================================================
-  return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
-      {currentMode === 'menu'       && renderMenu()}
-      {currentMode === 'quizSelect' && renderQuizSelect()}
-      {currentMode === 'learning'   && renderLearning()}
-      {currentMode === 'quiz'       && renderQuiz()}
-      {currentMode === 'result'     && renderResult()}
-    </div>
-  );
-}
-
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-</script>
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
 </body>
+
 </html>
