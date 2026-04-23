@@ -831,8 +831,15 @@ Yêu cầu:
           contents: [{ parts: [{ text: prompt }] }],
           generationConfig: { temperature: 0.7 }
         };
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 15000);
         try {
-          const res = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+          const res = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+            signal: controller.signal,
+          });
           const data = await res.json();
           if (!res.ok) {
             const msg = data?.error?.message || data?.error?.status || ('HTTP ' + res.status);
@@ -844,8 +851,9 @@ Yêu cầu:
           if (!jsonMatch) throw new Error('No JSON in response');
           setAiData(JSON.parse(jsonMatch[0]));
         } catch (err) {
-          setAiError('Lỗi: ' + err.message);
+          setAiError(err.name === 'AbortError' ? 'Timeout: AI không phản hồi sau 15s. Thử lại.' : 'Lỗi: ' + err.message);
         } finally {
+          clearTimeout(timer);
           setAiLoading(false);
         }
       };
