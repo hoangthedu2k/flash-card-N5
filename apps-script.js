@@ -30,7 +30,7 @@
 // CẤU HÌNH
 // ============================================================
 const SHEET_NAME = 'Sheet1';
-const GEMINI_MODEL = 'gemini-1.5-flash';
+const GEMINI_MODEL = 'gemini-2.5-flash';
 
 // ============================================================
 // GET: Trả về từ vựng, hoặc ?action=listModels để xem models available
