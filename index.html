@@ -6,6 +6,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gungun N5 Flashcards</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tailwind config đặt SAU khi CDN load xong -->
+  <script>
+    tailwind.config = {
+      theme: {
+        fontFamily: {
+          sans: ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+          mono: ['ui-monospace', 'SFMono-Regular', 'monospace'],
+        }
+      }
+    };
+  </script>
   <style>
     /* 3D Flip */
     .perspective-1000 {
@@ -120,7 +131,7 @@
     const CONFIG = {
       // URL của Google Apps Script Web App (deploy as: Execute as Me, Anyone)
       // Để trống ("") để dùng từ vựng built-in không cần Google Sheets
-      APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbz-k5dyvGMK4fjxoZs7GNjoeeBcrqvH_zypye694Dg26oaMlfqHreMgprQBjoYYoXhDiQ/exec",
+      APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbzHGmlVBn8cza5GTOkpAtmibPyttf74gH9WOAMeqkcSo3Ho110tXM0Egi0KVitZ3T2NPQ/exec",
 
       // Gemini API key (để trống nếu không dùng tính năng AI)
       GEMINI_API_KEY: "AIzaSyCaMErwRhrJquPm3p5QHgORJOXkAaYDfjM",
