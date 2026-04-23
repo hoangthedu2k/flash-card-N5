@@ -821,33 +821,15 @@
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${geminiKey}`;
         const prompt = `Bạn là giáo viên tiếng Nhật N5. Từ vựng: "${word.kanji}" (${word.kana}) - nghĩa tiếng Việt: "${word.meaning}".
 
-YÊU CẦU:
-1. Viết 2 câu ví dụ HOÀN TOÀN bằng tiếng Nhật (N5), có phiên âm Romaji và dịch tiếng Việt.
-2. Đưa ra 1 mẹo nhớ từ bằng tiếng Việt.`;
+Trả lời ĐÚNG định dạng JSON sau, không thêm gì khác:
+{"examples":[{"japanese":"...","romaji":"...","vietnamese":"..."},{"japanese":"...","romaji":"...","vietnamese":"..."}],"tip":"..."}
+
+Yêu cầu:
+- examples: 2 câu ví dụ tiếng Nhật N5 đơn giản, có romaji và dịch tiếng Việt
+- tip: 1 mẹo nhớ từ bằng tiếng Việt`;
         const payload = {
           contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            responseMimeType: "application/json",
-            responseSchema: {
-              type: "object",
-              properties: {
-                examples: {
-                  type: "array",
-                  items: {
-                    type: "object",
-                    properties: {
-                      japanese: { type: "string" },
-                      romaji: { type: "string" },
-                      vietnamese: { type: "string" }
-                    },
-                    required: ["japanese", "romaji", "vietnamese"]
-                  }
-                },
-                tip: { type: "string" }
-              },
-              required: ["examples", "tip"]
-            }
-          }
+          generationConfig: { temperature: 0.7 }
         };
         try {
           const res = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
@@ -857,7 +839,10 @@ YÊU CẦU:
             throw new Error(res.status + ': ' + msg);
           }
           const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (text) setAiData(JSON.parse(text)); else throw new Error('Empty response');
+          if (!text) throw new Error('Empty response');
+          const jsonMatch = text.match(/\{[\s\S]*\}/);
+          if (!jsonMatch) throw new Error('No JSON in response');
+          setAiData(JSON.parse(jsonMatch[0]));
         } catch (err) {
           setAiError('Lỗi: ' + err.message);
         } finally {
