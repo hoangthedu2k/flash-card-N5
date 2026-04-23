@@ -818,7 +818,7 @@
         const geminiKey = getGeminiKey();
         if (!geminiKey) { setAiError("Chưa có Gemini API key. Nhấn ⚙ để cài đặt."); return; }
         setAiLoading(true); setAiError(''); setAiData(null);
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`;
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`;
         const prompt = `Bạn là giáo viên tiếng Nhật N5. Từ vựng: "${word.kanji}" (${word.kana}) - nghĩa tiếng Việt: "${word.meaning}".
 
 YÊU CẦU:
