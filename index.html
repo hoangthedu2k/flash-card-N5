@@ -829,11 +829,23 @@ YÊU CẦU:
           generationConfig: {
             responseMimeType: "application/json",
             responseSchema: {
-              type: "OBJECT",
+              type: "object",
               properties: {
-                examples: { type: "ARRAY", items: { type: "OBJECT", properties: { japanese: { type: "STRING" }, romaji: { type: "STRING" }, vietnamese: { type: "STRING" } } } },
-                tip: { type: "STRING" }
-              }
+                examples: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      japanese: { type: "string" },
+                      romaji: { type: "string" },
+                      vietnamese: { type: "string" }
+                    },
+                    required: ["japanese", "romaji", "vietnamese"]
+                  }
+                },
+                tip: { type: "string" }
+              },
+              required: ["examples", "tip"]
             }
           }
         };
