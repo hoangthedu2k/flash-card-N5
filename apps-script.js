@@ -30,7 +30,7 @@
 // CẤU HÌNH
 // ============================================================
 const SHEET_NAME = 'Sheet1';
-const GEMINI_MODEL = 'gemma-3-4b-it';
+const GEMINI_MODEL = 'gemini-3-flash-preview';
 
 // ============================================================
 // GET: Trả về từ vựng, hoặc ?action=listModels để xem models available
@@ -110,7 +110,7 @@ function doPost(e) {
       if (String(data[i][0]).trim() === kanji) {
         sheet.getRange(i + 1, 4).setValue(status);
         updated = true;
-        break;
+        // Tiếp tục để cập nhật tất cả dòng trùng (không break)
       }
     }
 
